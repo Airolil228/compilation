@@ -48,7 +48,7 @@ void yyerror();
 
     suite_decl_type: STRUCT liste_champs FINSTRUCT 
             | TABLEAU dimension DE nom_type ; 
-
+    
     dimension: CROCHET_OUVRANT liste_dimensions CROCHET_FERMANT ; 
 
     liste_dimensions: une_dimension 
