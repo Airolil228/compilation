@@ -1,5 +1,6 @@
 %{
-    #include "grammaire.tab.y"
+ #include "grammaire.tab.h"
+ #include <stdio.h>
 %}
 
 %% 
@@ -17,13 +18,23 @@
 \,             { return VIRGULE; }
 
 
+\+             { return PLUS; }
+\-             { return MOINS; }
+\*             { return MULT; }
+\/             { return DIV; }
+\(             { return PARENTHESE_OUVRANTE; }
+\)             { return PARENTHESE_FERMANTE; }
 
-[1-9][0-9]*  { return ENTIER; }
-[a-zA-Z][a-zA-Z0-9]*   { return IDF; }/*A revoir*/
+"||"           { return OU; }
+
+[1-9][0-9]*                  { return ENTIER; } 
+[a-zA-Z][a-zA-Z0-9]*         { return IDF; } /*à ameliorer */
+
+[ \n]+                          { /*ignorer*/ }
+
+.                            { fprintf(stderr,"Invalide: %s\n", yytext); } /*Dans le reste de cas  */
 
 
 %%
 
-int wrap(void) {
-    return 1;
-}
+int yywrap(void) { return 1; }

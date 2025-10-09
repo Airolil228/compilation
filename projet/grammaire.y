@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 int yylex();
-void yyerror();
+int yyerror(char *s); 
 %}
+
 %token PROG  
 %token POINT_VIRG POINT
 %token DEBUT FIN
@@ -26,133 +27,128 @@ void yyerror();
 %token EGALE DIFFERENT INFERIEUR INFERIEUR_EGAL SUPERIEUR SUPERIEUR_EGAL
 %token VRAI FAUX
 %%
-    programme: PROG  corps ;
+    programme: expression  ;
 
-    corps: liste_decl liste_inst 
-            | liste_inst;
+   /*  corps: liste_decl liste_inst  */
+   /*          | liste_inst; */
 
-    liste_decl: declaration POINT_VIRG 
-            | liste_decl declaration POINT_VIRG ;
+   /*  liste_decl: declaration POINT_VIRG  */
+   /*          | liste_decl declaration POINT_VIRG ; */
 
-    liste_inst: DEBUT suite_liste_inst FIN ;
+   /*  liste_inst: DEBUT suite_liste_inst FIN ; */
     
-    suite_liste_inst: instruction POINT_VIRG 
-            | suite_liste_inst instruction POINT_VIRG ; 
+   /*  suite_liste_inst: instruction POINT_VIRG  */
+   /*          | suite_liste_inst instruction POINT_VIRG ;  */
 
-    declaration: declaration_type 
-            | declaration_variable 
-            | declaration_fonction 
-            | declaration_procedure ;
+   /*  declaration: declaration_type  */
+   /*          | declaration_variable  */
+   /*          | declaration_fonction  */
+   /*          | declaration_procedure ; */
     
-    declaration_type: TYPE IDF DEUX_POINTS suite_decl_type ; 
+   /*  declaration_type: TYPE IDF DEUX_POINTS suite_decl_type ;  */
 
-    suite_decl_type: STRUCT liste_champs FINSTRUCT 
-            | TABLEAU dimension DE nom_type ; 
+   /*  suite_decl_type: STRUCT liste_champs FINSTRUCT  */
+   /*          | TABLEAU dimension DE nom_type ;  */
     
-    dimension: CROCHET_OUVRANT liste_dimensions CROCHET_FERMANT ; 
+   /*  dimension: CROCHET_OUVRANT liste_dimensions CROCHET_FERMANT ;  */
 
-    liste_dimensions: une_dimension 
-            | liste_dimensions VIRGULE  une_dimension ;
+   /*  liste_dimensions: une_dimension  */
+   /*          | liste_dimensions VIRGULE  une_dimension ; */
 
-    une_dimension: CSTE_ENTIERE POINT_POINT CSTE_ENTIERE ; 
+   /*  une_dimension: CSTE_ENTIERE POINT_POINT CSTE_ENTIERE ;  */
 
-    liste_champs: un_champ 
-            | liste_champs POINT_VIRG un_champ ;         
+   /*  liste_champs: un_champ  */
+   /*          | liste_champs POINT_VIRG un_champ ;          */
 
-    un_champ: IDF DEUX_POINTS nom_type ;
+   /*  un_champ: IDF DEUX_POINTS nom_type ; */
 
-    nom_type: type_simple
-            | IDF ;
+   /*  nom_type: type_simple */
+   /*          | IDF ; */
     
-    type_simple: ENTIER 
-            | REEL 
-            | BOOLEEN 
-            | CARACTERE 
-            | CHAINE  CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT ;
+   /*  type_simple: ENTIER  */
+   /*          | REEL  */
+   /*          | BOOLEEN  */
+   /*          | CARACTERE  */
+   /*          | CHAINE  CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT ; */
     
-    declaration_variable: VARIABLE IDF DEUX_POINTS nom_type ; 
+   /*  declaration_variable: VARIABLE IDF DEUX_POINTS nom_type ;  */
 
-    declaration_procedure: PROCEDURE IDF liste_parametres corps; 
+   /*  declaration_procedure: PROCEDURE IDF liste_parametres corps;  */
 
-    declaration_fonction: FONCTION IDF liste_parametres RETOURNE type_simple corps ;
+   /*  declaration_fonction: FONCTION IDF liste_parametres RETOURNE type_simple corps ; */
 
-    liste_parametres: /* vide */ 
-            | PARENTHESE_OUVRANTE liste_param PARENTHESE_FERMANTE ;
+   /* liste_parametres: /\* vide *\/  */
+   /*          | PARENTHESE_OUVRANTE liste_param PARENTHESE_FERMANTE ; */
+
+   /*  liste_param: un_param */
+   /*          | liste_param POINT_VIRG un_param ; */
+
+   /*  un_param: IDF DEUX_POINTS type_simple ; */
+
+   /*  instruction: affectation  */
+   /*          |condition  */
+   /*          |tant_que  */
+   /*          |appel */
+   /*          |VIDE  */
+   /*          |RETOURNE resultat_retourne; */
     
-    liste_param: un_param
-            | liste_param POINT_VIRG un_param ;
+   /*  resultat_retourne: /\* vide *\/  */
+   /*          | expression ; */
 
-    un_param: IDF DEUX_POINTS type_simple ;
+   /*  appel: IDF liste_arguments ; */
 
-    instruction: affectation 
-            |condition 
-            |tant_que 
-            |appel
-            |VIDE 
-            |RETOURNE resultat_retourne;
-    
-    resultat_retourne: /* vide */ 
-            | expression ;
+   /*  liste_arguments: /\* vide *\/  */
+   /*          | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE ; */
 
-    appel: IDF liste_arguments ;
+   /*  liste_args: un_arg */
+   /*          | liste_args VIRGULE un_arg ; */
 
-    liste_arguments: /* vide */ 
-            | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE ;
+   /*  un_arg: expression ; */
 
-    liste_args: un_arg
-            | liste_args VIRGULE un_arg ;
+   /*  condition: SI expression_booleenne  */
+   /*          ALORS liste_inst */
+   /*          SINON liste_inst ; */
 
-    un_arg: expression ;
+   /*  tant_que: TANT_QUE expression_booleenne FAIRE liste_inst ; */
 
-    condition: SI expression_booleenne 
-            ALORS liste_inst
-            SINON liste_inst ;
+   /*  affectation: variable OPAFF expression ; */
 
-    tant_que: TANT_QUE expression_booleenne FAIRE liste_inst ;
+   /*  /\** Partie autonomie **\/ */
 
-    affectation: variable OPAFF expression ;
+   /*  variable: IDF  */
+   /*          | IDF CROCHET_OUVRANT expression CROCHET_FERMANT  */
+   /*          | IDF POINT expression ; */
 
-    /** Partie autonomie **/
+expression: expression1             { printf("Expression arithmetique reconnue ! \n"); }
+           | expression_booleenne   {printf("Expression booleen reconnue ! \n");}
+          ;
 
-    variable: IDF 
-            | IDF CROCHET_OUVRANT expression CROCHET_FERMANT 
-            | IDF POINT expression ;
+expression1: expression1 PLUS expression2
+           | expression1 MOINS expression2
+           | expression2
+           ;
 
-    expression: expression1
-            | expression_booleenne
-            ;
+expression2: expression2 MULT  expression3
+           | expression2 DIV expression3
+           | expression3
+           ;
 
-    expression1: expression1 PLUS expression2
-                | expression1 MOINS expression2
-                | expression2 ;
+expression3: PARENTHESE_OUVRANTE expression1 PARENTHESE_FERMANTE
+           | ENTIER
+           ;
 
-    expression2: expression2 MULT  expression3            
-                | expression2 DIV expression3
-                | expression3 ;
+expression_booleenne: expression_booleenne OU expression_booleenne1
+           | expression_booleenne1
+           ;
 
-    expression3: PARENTHESE_OUVRANTE expression1 PARENTHESE_FERMANTE
-                | ENTIER
-                ;
-
-    expression_booleenne: expression_booleenne ET expression_booleenne
-                | expression_booleenne OU expression_booleenne
-                | NON expression_booleenne
-                | expression EGALE expression
-                | expression DIFFERENT expression
-                | expression INFERIEUR expression
-                | expression INFERIEUR_EGAL expression
-                | expression SUPERIEUR expression
-                | expression SUPERIEUR_EGAL expression
-                | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
-                | VRAI
-                | FAUX
-                ;
-
+expression_booleenne1:
+           IDF
+           ;
     
 %%
 
 int yyerror(char *s){
-    printf("Error de syntaxte \n",s);
+    fprintf(stderr,"Erreur de syntaxte: %s\n",s);
     return 0;
 }
 
