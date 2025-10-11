@@ -1,1 +1,29 @@
-A || B
+    programme 
+    var Anas : entier ;
+
+    fonction appelle(a: entier; b: bool; c: char) retourne entier  
+    debut
+        retourne a;
+    fin ;
+
+    procedure appelle1(a: entier; b: bool; c: char) 
+    debut
+
+    fin ;
+
+    type monType1 : struct 
+        champ1 : entier ; 
+        champ2 : bool   
+    finstruct ;
+
+    type matrice : tab[1..5, 1..10] de entier;
+    
+    debut
+        tant_que C || D faire
+            debut 
+                a := b;
+            fin
+        fintant_que;
+
+        appelle(a,b,c); 
+    fin
