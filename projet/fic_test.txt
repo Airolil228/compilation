@@ -3,7 +3,7 @@
 
     fonction appelle(a: entier; b: bool; c: char) retourne entier  
     debut
-        retourne a;
+        retourne a ;
     fin ;
 
     procedure appelle1(a: entier; b: bool; c: char) 
@@ -16,10 +16,10 @@
         champ2 : bool   
     finstruct ;
 
-    type matrice : tab[1..5, 1..10] de entier;
-    
+    /* type monTab : tab [5..2] de entier; */ // Erreur l'analyse syntaxique sur le "5" 
+
     debut
-        tant_que C || D faire
+        tant_que C == true || D == false faire
             debut 
                 a := b;
             fin

@@ -18,7 +18,7 @@
         %token TABLEAU DE 
         %token CROCHET_OUVRANT CROCHET_FERMANT
         %token VIRGULE
-        %token CSTE_ENTIERE POINT_POINT
+        %token CSTE_ENTIERE CSTE_REEL POINT_POINT
         %token ENTIER REEL BOOLEEN CARACTERE CHAINE 
         %token VARIABLE 
         %token PROCEDURE FONCTION RETOURNE
@@ -29,7 +29,7 @@
         %token OPAFF
         %token PLUS MOINS MULT DIV
         %token ET OU NON
-        %token EGALE DIFFERENT INFERIEUR INFERIEUR_EGAL SUPERIEUR SUPERIEUR_EGAL
+        %token EGALE DIFFERENT INFERIEUR INFERIEUR_EGAL SUPERIEUR SUPERIEUR_EGAL 
         %token VRAI FAUX
         %%
 
@@ -158,12 +158,12 @@
 
         /*** Partie autonomie ***/
         variable: IDF  
-                | IDF CROCHET_OUVRANT expression CROCHET_FERMANT  
-                | IDF POINT expression 
+                | variable CROCHET_OUVRANT expression1 CROCHET_FERMANT                  
+                | variable POINT IDF 
                 ; 
 
         expression: expression1                                                          { printf("Expression arithmetique reconnue ! \n"); }
-                | expression_booleenne                                                   { printf("Expression booleenne reconnue ! \n"); }     
+                | expression_booleenne                                                   { printf("Expression booleenne reconnue ! \n"); }
                 ;
 
         expression1: expression1 PLUS expression2
@@ -177,20 +177,35 @@
                 ;
 
         expression3: PARENTHESE_OUVRANTE expression1 PARENTHESE_FERMANTE
+                | variable
                 | CSTE_ENTIERE
+                | CSTE_REEL
+                | IDF PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE /*Pour incluire les fonctions dans les expressions comme x+4-f(..)  */
                 ;
 
+       expression_booleenne: expression_booleenne OU expression_et
+                    | expression_et
+                    ;
 
-        expression_booleenne: expression_booleenne OU expression_booleenne1
-                | expression_booleenne1
-                ;
+        expression_et: expression_et ET expression_not
+                    | expression_not
+                    ;
 
-        expression_booleenne1:
-                IDF
-                ;
-        
-        %%
+        expression_not: NON expression_not
+                    | expression_comp
+                    ;
 
+        expression_comp: expression1 INFERIEUR expression1   
+               | expression1 SUPERIEUR expression1
+               | expression1 EGALE expression1
+               | expression1 INFERIEUR_EGAL expression1
+               | expression1 SUPERIEUR_EGAL expression1
+               | expression1 DIFFERENT expression1
+               | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
+               ;
+
+
+%%
         int yyerror(char *s){
         fprintf(stderr, "\n ERREUR DE SYNTAXE à la ligne %d\n", yylineno);
         fprintf(stderr, " le token incorrect: %s\n", yytext);

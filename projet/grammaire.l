@@ -49,6 +49,7 @@
 ">="            { return SUPERIEUR_EGAL; }
 ">"             { return SUPERIEUR; }
 "=="            { return EGALE; }
+
 "<>"            { return DIFFERENT; }
 
 "&&"           { return ET; }
@@ -69,6 +70,7 @@
 "//".*                        { /* Ignorer les commentaires de ligne */ }
 
 [1-9][0-9]*                  { return CSTE_ENTIERE; } 
+[0-9]+\.?[0-9]*             { return CSTE_REEL; }
 [a-zA-Z][a-zA-Z0-9]*         { return IDF; } /*à ameliorer */
 
 [ \t\r]+                   { /* ignorer tous les espaces blancs */ }
