@@ -1,7 +1,7 @@
         %{
         #include <stdio.h>
         #include <stdlib.h>
-
+        #include "include/tab_lexico.h"
         int yylex();
         int yyerror(char *s); 
 
@@ -31,6 +31,12 @@
         %token ET OU NON
         %token EGALE DIFFERENT INFERIEUR INFERIEUR_EGAL SUPERIEUR SUPERIEUR_EGAL 
         %token VRAI FAUX
+
+        %union{
+                int intval;
+                //arbre 
+        }
+
         %%
 
         programme: PROG corps
@@ -122,26 +128,26 @@
 
         instruction: affectation  
                 | condition  
-                |tant_que    
-                |appel      
+                | tant_que    
+                | appel      
                 | VIDE       
                 | RETOURNE resultat_retourne
         ; 
 
         resultat_retourne: /* vide */                                                  
-                         | expression 
-                         ; 
+                | expression 
+                ; 
 
-        appel: IDF liste_arguments                                                   { printf("Appel de fonction reconnue ! \n"); }
-         ; 
-
-        liste_arguments: /* vide */
-                 | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE  
+        appel: IDF liste_arguments         { printf("Appel de fonction reconnue ! \n"); }
         ; 
 
+        liste_arguments: /* vide */
+                | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE  
+                ; 
+
         liste_args: un_arg 
-                  | liste_args VIRGULE un_arg 
-                  ;
+                | liste_args VIRGULE un_arg 
+                ;
 
         un_arg: expression 
                 ; 
@@ -184,16 +190,16 @@
                 ;
 
        expression_booleenne: expression_booleenne OU expression_et
-                    | expression_et
-                    ;
+                | expression_et
+                ;
 
         expression_et: expression_et ET expression_not
-                    | expression_not
-                    ;
+                | expression_not
+                ;
 
         expression_not: NON expression_not
-                    | expression_comp
-                    ;
+                | expression_comp
+                ;
 
         expression_comp: expression1 INFERIEUR expression1   
                | expression1 SUPERIEUR expression1
@@ -203,23 +209,24 @@
                | expression1 DIFFERENT expression1
                | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
                ;
-
-
 %%
-        int yyerror(char *s){
+
+int yyerror(char *s){
         fprintf(stderr, "\n ERREUR DE SYNTAXE à la ligne %d\n", yylineno);
         fprintf(stderr, " le token incorrect: %s\n", yytext);
         return 0;
-        }
+}
 
-        int main(){
 
+
+
+int main(){
+        init_tab_lexico();
+        
         if(yyparse() == 0) {
                 printf("Analyse syntaxique terminée avec succès !\n");
-        } else {
-                printf("Echec de l'analyse syntaxique.\n");
+                afficher_tab_lex(NULL);  // Décommenter pour afficher après succès
+        }         
 
-        };
-
-        return 0;
-        }
+        exit(EXIT_SUCCESS);
+}               

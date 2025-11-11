@@ -19,8 +19,8 @@
     /* type monTab : tab [5..2] de entier; */ // Erreur l'analyse syntaxique sur le "5" 
 
     debut
-        tant_que C == true || D == false faire
-            debut 
+        tant_que (C == true) || (D == false) faire
+            debut
                 a := b;
             fin
         fintant_que;

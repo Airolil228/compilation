@@ -6,6 +6,7 @@
 
 #define MAX_TAB_LEXICO 500 // Taille de la table lexicale
 #define MAX_LEXEME_PRIM 4  // Nombre de lexèmes primitifs
+#define MAX_TAB_HASHCODE 32 // Taille de la table de hachage
 
 typedef struct{
     int longueur;      // longueur du lexème
@@ -13,9 +14,9 @@ typedef struct{
     int suivant;      // index du prochain lexème en cas de collision
 } table_lexico;
 
-table_lexico tab_lexico[MAX_TAB_LEXICO];
+extern table_lexico tab_lexico[MAX_TAB_LEXICO];
 
-extern char *lexemes_prim[MAX_LEXEME_PRIM] = {"entier", "double", "char", "boolean"};
+extern char *lexemes_prim[MAX_LEXEME_PRIM];
 
 int inserer_lexeme(char *lexeme);
 
@@ -23,6 +24,6 @@ int rechercher_lexeme(char *lexeme);
 
 void init_tab_lexico();
 
-void afficher_tab_lexico();
+void afficher_tab_lex();
 
 #endif /* TAB_LEXICO_H */

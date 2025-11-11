@@ -1,6 +1,11 @@
 %{
  #include "grammaire.tab.h"
  #include <stdio.h>
+ #include <stdlib.h>
+
+ //#include "include/tab_semantique.h"
+ #include "include/tab_lexico.h"
+
 %}
 
 %% 
@@ -64,19 +69,20 @@
 \(             { return PARENTHESE_OUVRANTE; }
 \)             { return PARENTHESE_FERMANTE; }
 
-
 \/\*([^*]|\*+[^*/])*\*\/    { /* Ignorer les commentaires */ }
 
 "//".*                        { /* Ignorer les commentaires de ligne */ }
 
 [1-9][0-9]*                  { return CSTE_ENTIERE; } 
-[0-9]+\.?[0-9]*             { return CSTE_REEL; }
-[a-zA-Z][a-zA-Z0-9]*         { return IDF; } /*à ameliorer */
+[0-9]+\.?[0-9]*              { return CSTE_REEL; }
+[a-zA-Z][a-zA-Z0-9]*         { yylval.intval = inserer_lexeme(yytext); 
+                               printf("Identifiant: %s\n", yytext); 
+                               return IDF; } 
 
-[ \t\r]+                   { /* ignorer tous les espaces blancs */ }
-\n                         {  ++yylineno; }
+[ \t\r]+                     { /* ignorer tous les espaces blancs */ }
+\n                           {  ++yylineno; }
 
-.                          { fprintf(stderr,"Caractere invalide: '%s' (ASCII: %d)\n", yytext, yytext[0]); } /*Dans le reste de cas  */
+.                           { fprintf(stderr,"Caractere invalide: '%s' (ASCII: %d)\n", yytext, yytext[0]); } /*Dans le reste de cas  */
 
 
 %%

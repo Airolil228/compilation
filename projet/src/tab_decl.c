@@ -106,7 +106,6 @@ void afficher_tab_decl(FILE *flux) {
                     tab_de_dec[i].exec);
         }
     }
-
     fprintf(flux, "===============================================================\n\n");
 }
 
@@ -147,12 +146,11 @@ int main() {
     inserer_decl(10, VAR, 1, 0, 5);
     inserer_decl(15, PROC, 0, 2, 10);
     
-*/
     /* Afficher sur la console */
-//    afficher_tab_decl(stdout);
+    // afficher_tab_decl(stdout);
 
     /* Afficher la chaîne du lexème 10 */
-  //  afficher_chaine(stderr, 10);
+    // afficher_chaine(stderr, 10);
 
     /* Afficher dans un fichier */
     //FILE *f = fopen("table_decl.txt", "w");
