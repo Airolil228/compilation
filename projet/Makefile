@@ -1,12 +1,12 @@
 CFLAGS = -Wall -Wextra -g
 
-OBJ = tab_lexico.o tab_declarations.o 
+OBJ = tab_lexico.o tab_declarations.o pile.o
 
 parser: grammaire.tab.c grammaire.tab.h lex.yy.c $(OBJ)
 	gcc $(OBJ) grammaire.tab.c lex.yy.c -o parser -lfl
 
-test: src/tab_lexico.c test.c
-	gcc $(CFLAGS) -o test test.c src/tab_lexico.c
+test: test.c pile.o 
+	gcc pile.o test.c -o test -lfl
 
 grammaire.tab.c grammaire.tab.h: grammaire.y
 	bison -d grammaire.y -Wcounterexamples

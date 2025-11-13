@@ -1,26 +1,52 @@
 #include "../include/pile.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-pile creer_noeud() {
-    pile p = (pile) malloc(sizeof(struct Pile));
-    
-    if (!p) {
-        fprintf(stdout, "Erreur d'allocation mémoire pour le noeud\n");
-        exit(EXIT_FAILURE);
-    }
-
-    p->sommet = NULL;
-    return p;
+// Création d'une pile vide
+pile* creationPile() {
+	pile* pile = malloc(sizeof(pile));
+	pile->taille = 0;
+	pile->tete = NULL;
+	return pile;
 }
 
-int main() {
-    pile ma_pile = creer_noeud();
-    if (ma_pile != NULL) {
-        printf("Pile créée avec succès.\n");
-    } else {
-        printf("Échec de la création de la pile.\n");
+void afficher_pille(pile* p){
+    elementPile* current = p->tete; 
+    printf("Pile (taille= %d ): ", p->taille); 
+    while(current != NULL){
+        printf("%d ", current->valeur); 
+        current = current->suivant; 
     }
-    free(ma_pile);
-    
+    printf("\n"); 
+}
+
+void empile(pile* pile, int val) {
+	// On crée un nouvel élément
+	elementPile* e = malloc(sizeof(elementPile));
+	e->valeur = val;
+	// On le met à la tête de la pile
+	e->suivant = pile->tete;
+	pile->tete = e;
+	pile->taille = pile->taille + 1;
+}
+
+void depile(pile* pile) {
+	elementPile* e = pile->tete;
+	// On enlève le premier élément
+	pile->tete = e->suivant;
+	free(e);
+	pile->taille = pile->taille - 1;
+}
+
+int taille(pile* pile) {
+	return pile->taille;
+}
+
+bool estVide(pile* pile) {
+	return (pile->taille == 0);
+}
+
+int sommet(pile* pile) {
+	return pile->tete->valeur;
 }

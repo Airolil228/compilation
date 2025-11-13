@@ -9,6 +9,7 @@
 
 /*================== Nature ==================*/
 
+#define TYPE_B 0        /* 0: type de base       (TYPE_B) */
 #define TYPE_S 1        /* 1: type structure     (TYPE_S) */
 #define TYPE_T 2        /* 2: type tableau       (TYPE_T) */
 #define VAR 3           /* 3: variable           (VAR)    */
@@ -27,9 +28,10 @@ typedef struct {
     int exec;       
 } TAB_DE_Decl;
 
-TAB_DE_Decl tab_de_dec[Taille_TAB];
-int zone_de_deb_utiliser = 0;
-
+extern TAB_DE_Decl tab_de_dec[Taille_TAB];
+extern int zone_de_deb_utiliser;  
+extern int numregion;            /* region courante */
+ 
 /*================== Fonctions ==================*/
 
 /* Initialisation de la table */

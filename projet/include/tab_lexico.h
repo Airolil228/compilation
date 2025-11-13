@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define MAX_TAB_LEXICO 500 // Taille de la table lexicale
-#define MAX_LEXEME_PRIM 4  // Nombre de lexèmes primitifs
+#define MAX_LEXEME_PRIM 4  // Nombre de lexèmes primitifs <=> lexèmes base 
 #define MAX_TAB_HASHCODE 32 // Taille de la table de hachage
 
 typedef struct{

@@ -1,23 +1,34 @@
-#define PILE_H
+#ifndef PILE_H
 #define PILE_H
 
-typedef struct Element {
-    int Element;
-    struct Element* suivant;
-} Element;
+#include <stdbool.h>
 
+
+// Élement de pile
+typedef struct ElementPile {
+	int valeur;
+	struct ElementPile* suivant;
+} elementPile;
+
+// Pile qui pointe juste vers le premier élément
 typedef struct Pile {
-    Element* sommet;
-} Pile;
+	int taille;
+	elementPile* tete; 
+} pile;
 
-typedef Pile* pile;
+pile* creationPile();
 
-pile creer_pile();
+void afficher_pille(pile* p); 
 
-void empiler(pile pile, int Element);
-int depiler(pile pile);
-int est_vide(pile pile);
+void empile(pile* pile, int val);
 
-void liberer_pile(pile pile);
+void depile(pile* pile);
+
+int taille(pile* pile);
+
+bool estVide(pile* pile);
+
+int sommet(pile* pile);
+
 
 #endif /* PILE_H */

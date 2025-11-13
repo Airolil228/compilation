@@ -5,6 +5,7 @@
 
  //#include "include/tab_semantique.h"
  #include "include/tab_lexico.h"
+ #include "include/tab_decl.h"
 
 %}
 
@@ -21,10 +22,10 @@
 "reel"          { return REEL;     }
 "bool"          {return BOOLEEN;   }
 "char"          { return CARACTERE; }
-"chaine"        {return CHAINE;    }
-"var"           {return VARIABLE;  }
-"procedure"     {return PROCEDURE; }
-"fonction"      {return FONCTION;  }
+"chaine"        { return CHAINE;    }
+"var"           { return VARIABLE;  }
+"procedure"     { return PROCEDURE; }
+"fonction"      { return FONCTION;  }
 "retourne"      { return RETOURNE; }
 "vide"          { return VIDE; }
 "si"            {return SI;}

@@ -2,6 +2,7 @@
         #include <stdio.h>
         #include <stdlib.h>
         #include "include/tab_lexico.h"
+        #include "include/tab_decl.h"
         int yylex();
         int yyerror(char *s); 
 
@@ -222,10 +223,12 @@ int yyerror(char *s){
 
 int main(){
         init_tab_lexico();
-        
+        init_tab_decl();
+
         if(yyparse() == 0) {
                 printf("Analyse syntaxique terminée avec succès !\n");
-                afficher_tab_lex(NULL);  // Décommenter pour afficher après succès
+                //afficher_tab_lex(NULL);  // Décommenter pour afficher après succès
+                afficher_tab_decl(NULL);
         }         
 
         exit(EXIT_SUCCESS);
