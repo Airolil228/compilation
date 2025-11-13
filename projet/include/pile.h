@@ -16,9 +16,10 @@ typedef struct Pile {
 	elementPile* tete; 
 } pile;
 
+
 pile* creationPile();
 
-void afficher_pille(pile* p); 
+void afficher_pile(pile* p); 
 
 void empile(pile* pile, int val);
 

@@ -22,8 +22,8 @@ void init_tab_decl() {
     }
 }
 
-int inserer_decl(int lex_id, int nature, int region, int description, int exec) {
-    if (lex_id < 0 || lex_id >= Zone_de_debordement) {
+int inserer_decl(int lex_id, int nature, int region, int description, int exec){
+    if (lex_id < 0 || lex_id >= Zone_de_debordement){
         /* lex_id doit être dans la zone PRIMAIRE uniquement */
         fprintf(stderr,"[tabdecl] inserer_decl: lex_id=%d hors de la primaire [0..%d]\n", lex_id, Zone_de_debordement - 1);
         return -1;
@@ -55,7 +55,7 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec) 
         fprintf(stderr, "[tabdecl] inserer_decl: zone de débordement pleine (prochain=%d, max=%d)\n", indice_deb, Taille_TAB);
         return -1;
     }
-
+    
     /* Placer le nouvel enregistrement dans la table (partie débordement) */
     tab_de_dec[indice_deb] = rec;
     zone_de_deb_utiliser++; /* on a consommé une case de débordement */
@@ -96,7 +96,7 @@ static const char* nature_str(int n) {
 void afficher_tab_decl(FILE *flux) {
     if (!flux) flux = stdout;
 
-    fprintf(flux, "\n===== TABLE DES DECLARATIONS =====\n");
+    fprintf(flux, "\n=============== TABLE DES DECLARATIONS ==============\n");
     fprintf(flux, "Zone primaire      : [0 .. %d]\n", Zone_de_debordement - 1);
     fprintf(flux, "Zone de débordement: [%d .. %d]  (utilisées : %d)\n\n",
             Zone_de_debordement, Taille_TAB, zone_de_deb_utiliser);

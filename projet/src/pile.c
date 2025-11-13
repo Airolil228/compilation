@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+int numeregion = 0;
+pile* pile_region = NULL;
+
 // Création d'une pile vide
 pile* creationPile() {
 	pile* pile = malloc(sizeof(pile));
@@ -11,9 +14,10 @@ pile* creationPile() {
 	return pile;
 }
 
-void afficher_pille(pile* p){
-    elementPile* current = p->tete; 
-    printf("Pile (taille= %d ): ", p->taille); 
+void afficher_pile(pile* p){
+    elementPile* current = p->tete;
+
+    printf("Pile : "); 
     while(current != NULL){
         printf("%d ", current->valeur); 
         current = current->suivant; 
@@ -28,7 +32,6 @@ void empile(pile* pile, int val) {
 	// On le met à la tête de la pile
 	e->suivant = pile->tete;
 	pile->tete = e;
-	pile->taille = pile->taille + 1;
 }
 
 void depile(pile* pile) {
@@ -36,7 +39,6 @@ void depile(pile* pile) {
 	// On enlève le premier élément
 	pile->tete = e->suivant;
 	free(e);
-	pile->taille = pile->taille - 1;
 }
 
 int taille(pile* pile) {
