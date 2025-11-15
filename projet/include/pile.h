@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#define MAX_ELEMENT_REGION 5000 
 
 // Élement de pile
 typedef struct ElementPile {
@@ -16,6 +17,21 @@ typedef struct Pile {
 	elementPile* tete; 
 } pile;
 
+//Une autre implementation de la pile : une implementation statique  
+typedef union type_retour{
+	char * chaine; 
+	int entier;
+	bool boolean;
+	float floatant;  
+} type_retour; 
+
+
+typedef struct{
+	type_retour  type; 
+	int val; 
+}noeud_pile ;
+
+extern noeud_pile pile_exec[MAX_ELEMENT_REGION]; 
 
 pile* creationPile();
 

@@ -1,12 +1,7 @@
 %{
  #include "grammaire.tab.h"
- #include <stdio.h>
- #include <stdlib.h>
-
- //#include "include/tab_semantique.h"
- #include "include/tab_lexico.h"
- #include "include/tab_decl.h"
-
+ #include <stdio.h>         
+#include "include/semantique.h"
 %}
 
 %% 
@@ -22,10 +17,10 @@
 "reel"          { return REEL;     }
 "bool"          {return BOOLEEN;   }
 "char"          { return CARACTERE; }
-"chaine"        { return CHAINE;    }
-"var"           { return VARIABLE;  }
-"procedure"     { return PROCEDURE; }
-"fonction"      { return FONCTION;  }
+"chaine"        {return CHAINE;    }
+"var"           {return VARIABLE;  }
+"procedure"     {return PROCEDURE; }
+"fonction"      {return FONCTION;  }
 "retourne"      { return RETOURNE; }
 "vide"          { return VIDE; }
 "si"            {return SI;}
@@ -70,20 +65,19 @@
 \(             { return PARENTHESE_OUVRANTE; }
 \)             { return PARENTHESE_FERMANTE; }
 
+
 \/\*([^*]|\*+[^*/])*\*\/    { /* Ignorer les commentaires */ }
 
 "//".*                        { /* Ignorer les commentaires de ligne */ }
 
-[1-9][0-9]*                  { return CSTE_ENTIERE; } 
-[0-9]+\.?[0-9]*              { return CSTE_REEL; }
-[a-zA-Z][a-zA-Z0-9]*         { yylval.intval = inserer_lexeme(yytext); 
-                               /* printf("Identifiant: %s\n", yytext); */ 
-                               return IDF; } 
+[1-9][0-9]*                  { yylval.ival = atoi(yytext); return CSTE_ENTIERE; } 
+[0-9]+\.?[0-9]*             { return CSTE_REEL; }
+[a-zA-Z][a-zA-Z0-9]*         { yylval.ival = inserer_lexeme(yytext); return IDF; } /*à ameliorer */
 
-[ \t\r]+                     { /* ignorer tous les espaces blancs */ }
-\n                           {  ++yylineno; }
+[ \t\r]+                   { /* ignorer tous les espaces blancs */ }
+\n                         {  ++yylineno; }
 
-.                           { fprintf(stderr,"Caractere invalide: '%s' (ASCII: %d)\n", yytext, yytext[0]); } /*Dans le reste de cas  */
+.                          { fprintf(stderr,"Caractere invalide: '%s' (ASCII: %d)\n", yytext, yytext[0]); } /*Dans le reste de cas  */
 
 
 %%

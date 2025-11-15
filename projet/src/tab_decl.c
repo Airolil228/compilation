@@ -2,35 +2,42 @@
 #include "../include/tab_lexico.h"
 #include <string.h>
 
-int zone_de_deb_utiliser = 0;
-int numregion = 0;
 TAB_DE_Decl tab_de_dec[Taille_TAB];
+int zone_de_deb_utiliser = 0;
+
 
 /* Initialisation de la table de declaration */
-void init_tab_decl() {
+void init_tab_decl(){
     for (int i = 0; i < Taille_TAB; i++) {
+        if( i >= 0 && i < NB_TYPES_DE_BASE ) {
+            /* Initialiser les types de base prédéfinis */
+            tab_de_dec[i].nature = TYPE_B;
+            tab_de_dec[i].suivant = -1;
+            tab_de_dec[i].region = 0;
+            tab_de_dec[i].description = -1;
+            tab_de_dec[i].exec = -1;
+        }
         tab_de_dec[i].nature = -1;
         tab_de_dec[i].suivant = -1;
-        tab_de_dec[i].region = -1;
+        tab_de_dec[i].region = 0;
         tab_de_dec[i].description = -1;
-        tab_de_dec[i].exec = 0;
+        tab_de_dec[i].exec = -1;
     }
-    zone_de_deb_utiliser = 0;
 
-    for(int i = 0; i < MAX_LEXEME_PRIM; i++){
-        inserer_decl(i,0,0,i,1);
-    }
+    
+
+    zone_de_deb_utiliser = 0;
 }
 
-int inserer_decl(int lex_id, int nature, int region, int description, int exec){
-    if (lex_id < 0 || lex_id >= Zone_de_debordement){
+int inserer_decl(int lex_id, int nature, int region, int description, int exec) {
+    if (lex_id < 0 || lex_id >= Zone_de_debordement) {
         /* lex_id doit être dans la zone PRIMAIRE uniquement */
         fprintf(stderr,"[tabdecl] inserer_decl: lex_id=%d hors de la primaire [0..%d]\n", lex_id, Zone_de_debordement - 1);
         return -1;
     }
 
-    if (nature < 0 || nature > FCT) {
-        fprintf(stderr,"[tabdecl] inserer_decl: nature %d invalide (attendu 0..6)\n", nature);
+    if (nature < TYPE_S || nature > FCT) {
+        fprintf(stderr,"[tabdecl] inserer_decl: nature %d invalide (attendu 1..6)\n", nature);
         return -1;
     }
 
@@ -50,12 +57,12 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec){
 
     /* Cas 2 : insérer en DÉBORDEMENT */
     int indice_deb = Zone_de_debordement + zone_de_deb_utiliser;
-    if (indice_deb > Taille_TAB) {
+    if (indice_deb >= Taille_TAB) {
         /* Plus de place en débordement */
         fprintf(stderr, "[tabdecl] inserer_decl: zone de débordement pleine (prochain=%d, max=%d)\n", indice_deb, Taille_TAB);
         return -1;
     }
-    
+
     /* Placer le nouvel enregistrement dans la table (partie débordement) */
     tab_de_dec[indice_deb] = rec;
     zone_de_deb_utiliser++; /* on a consommé une case de débordement */
@@ -78,10 +85,11 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec){
 
 
 /* Fonction d'affichage de la table des déclarations */
+
 /* - Affiche chaque case non vide (nature != 0) */
 static const char* nature_str(int n) {
     switch (n) {
-        case TYPE_B: return "TYPE_B"; 
+        case TYPE_B: return "TYPE_B ";
         case TYPE_S: return "TYPE_S";
         case TYPE_T: return "TYPE_T";
         case VAR:    return "VAR";
@@ -89,14 +97,14 @@ static const char* nature_str(int n) {
         case PROC:   return "PROC";
         case FCT:    return "FCT";
     }
-    return "vide"; 
+    return "vide"; /* jamais atteint */
 }
 
 /* Affiche le contenu de la table */
 void afficher_tab_decl(FILE *flux) {
     if (!flux) flux = stdout;
 
-    fprintf(flux, "\n=============== TABLE DES DECLARATIONS ==============\n");
+    fprintf(flux, "\n===== TABLE DES DECLARATIONS =====\n");
     fprintf(flux, "Zone primaire      : [0 .. %d]\n", Zone_de_debordement - 1);
     fprintf(flux, "Zone de débordement: [%d .. %d]  (utilisées : %d)\n\n",
             Zone_de_debordement, Taille_TAB, zone_de_deb_utiliser);
@@ -116,6 +124,7 @@ void afficher_tab_decl(FILE *flux) {
                     tab_de_dec[i].exec);
         }
     }
+
     fprintf(flux, "===============================================================\n\n");
 }
 
@@ -148,21 +157,20 @@ void afficher_chaine(FILE *flux, int lex_id) {
     fprintf(flux, "\n");
 }
 
+/*
+int main() {
+    init_tab_decl();
 
-//int main() {
-    //init_tab_decl();
-
-    /*
     inserer_decl(10, VAR, 0, 0, 0);
     inserer_decl(10, VAR, 1, 0, 5);
     inserer_decl(15, PROC, 0, 2, 10);
-    */
-
+    
+*/
     /* Afficher sur la console */
-    // afficher_tab_decl(stdout);
+//    afficher_tab_decl(stdout);
 
     /* Afficher la chaîne du lexème 10 */
-    // afficher_chaine(stderr, 10);
+  //  afficher_chaine(stderr, 10);
 
     /* Afficher dans un fichier */
     //FILE *f = fopen("table_decl.txt", "w");

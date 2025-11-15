@@ -6,6 +6,7 @@
 
 #define Taille_TAB 5000
 #define Zone_de_debordement 500
+#define NB_TYPES_DE_BASE 4  /* nombre de types de base prédéfinis */
 
 /*================== Nature ==================*/
 
@@ -29,8 +30,8 @@ typedef struct {
 } TAB_DE_Decl;
 
 extern TAB_DE_Decl tab_de_dec[Taille_TAB];
-extern int zone_de_deb_utiliser;  
-extern int numregion;            /* region courante */
+extern int zone_de_deb_utiliser;            
+extern int numregion;                       /* region courante */
  
 /*================== Fonctions ==================*/
 
@@ -43,7 +44,6 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec);
 void afficher_tab_decl(FILE *flux);
 
 void afficher_chaine(FILE *flux, int lex_id);
-
 
 
 #endif /* _TABDECL_H */

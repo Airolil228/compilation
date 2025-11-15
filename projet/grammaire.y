@@ -1,33 +1,30 @@
         %{
         #include <stdio.h>
         #include <stdlib.h>
-
-        #include "include/tab_lexico.h"
-        #include "include/tab_decl.h"
-        #include "include/pile.h"
+        #include "include/semantique.h"
 
         int yylex();
         int yyerror(char *s); 
 
         extern int yylineno;      // Nécessaire pour afficher le numéro de ligne
         extern char *yytext;      // Nécessaire pour afficher le token
-        extern pile* pile_region; // Pile des régions pour la gestion des portées
-        extern int numeregion;    // Numéro de la région courante
-        extern int NIS;          //Niveau d'imbrication statique 
+        extern FILE *yyin;     // IMPORTANT: source du lexer
+
 
         %}
-
+        %union {
+                int ival;   /* pour IDF, numéros de type, constantes entières, etc. */
+        }
         
-
         %token PROG  
         %token POINT_VIRG POINT
         %token DEBUT FIN
-        %token TYPE IDF DEUX_POINTS
+        %token TYPE DEUX_POINTS
         %token STRUCT FINSTRUCT
         %token TABLEAU DE 
         %token CROCHET_OUVRANT CROCHET_FERMANT
         %token VIRGULE
-        %token CSTE_ENTIERE CSTE_REEL POINT_POINT
+        %token POINT_POINT
         %token ENTIER REEL BOOLEEN CARACTERE CHAINE 
         %token VARIABLE 
         %token PROCEDURE FONCTION RETOURNE
@@ -40,20 +37,15 @@
         %token ET OU NON
         %token EGALE DIFFERENT INFERIEUR INFERIEUR_EGAL SUPERIEUR SUPERIEUR_EGAL 
         %token VRAI FAUX
+        %token <ival> IDF CSTE_ENTIERE CSTE_REEL
+        %type  <ival> nom_type type_simple
 
-        %union{
-                int intval;
-                //arbre 
-        }
-
-        %type <intval> variable ;
-        
         %%
 
-        programme: PROG {numeregion = 0; pile_region = creationPile(); NIS = 0;} corps
+        programme: PROG corps
         ;
 
-        corps:  liste_decl liste_inst   
+         corps:  liste_decl liste_inst   
                 | liste_inst
         ;        
                 
@@ -69,17 +61,25 @@
                       | liste_inst_non_vide POINT_VIRG 
         ;
         
-        declaration:    declaration_variable                                    { /*printf("Declaration de variable reconnue ! \n");*/}
-                      | declaration_fonction                                    { /*printf("Declaration de fonction reconnue ! \n");*/}
-                      | declaration_procedure                                   { /*printf("Declaration de procedure reconnue ! \n");*/} 
-                      | declaration_type                                        { /*printf("Declaration de type reconnue ! \n");*/}       
+        declaration:    declaration_variable                                    { printf("Declaration de variable reconnue ! \n");}
+                      | declaration_fonction                                    { printf("Declaration de fonction reconnue ! \n");}
+                      | declaration_procedure                                   { printf("Declaration de procedure reconnue ! \n");} 
+                      | declaration_type                                        { printf("Declaration de type reconnue ! \n");}       
         ;
         
-        declaration_type: TYPE IDF DEUX_POINTS suite_decl_type 
-        ;  
-
-        suite_decl_type: STRUCT liste_champs FINSTRUCT                          { /*printf("Type structure reconnu ! \n");*/ }
-                        | TABLEAU dimension DE nom_type                         { /*printf("Type tableau reconnu ! \n");*/ }       
+        declaration_type: TYPE IDF DEUX_POINTS STRUCT liste_champs FINSTRUCT
+        {
+            /* TYPE struct : pour l’instant region_champs=0, taille_struct=0 (à calculer plus tard) */
+            sem_decl_struct($2, 0, 0);
+            printf("Type structure reconnu ! \n");
+        }
+                | TYPE IDF DEUX_POINTS TABLEAU dimension DE nom_type
+        {
+            /* TODO: extraire les bornes de "dimension" si tu les passes en attribut
+               Ici on met borne_inf=0, borne_sup=$7 taille symbolique → à améliorer. */
+            sem_decl_tab($2, $7, 0, 0);
+            printf("Type tableau reconnu ! \n");
+        }
         ;
 
         dimension: CROCHET_OUVRANT liste_dimensions CROCHET_FERMANT             
@@ -100,23 +100,34 @@
         ; 
         
         declaration_variable: VARIABLE IDF DEUX_POINTS nom_type 
+        { 
+            /* $2 : identifiant → index lexico (via le scanner)
+               $4 : code du type (entier, bool, struct..., grâce à nom_type) */
+            sem_decl_var($2, $4, 1);
+            printf("Declaration de variable reconnue ! \n");
+        }
         ;  
 
-        nom_type: type_simple 
-                  | IDF 
+        nom_type: type_simple   { $$ = $1; }
+                  | IDF         { $$ = $1; }   /* type défini par l’utilisateur (struct, alias, etc.) */
         ; 
 
-        type_simple: ENTIER 
-                  | REEL  
-                  | BOOLEEN  
-                  | CARACTERE  
-                  | CHAINE  CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT 
+        type_simple: ENTIER               { $$ = 1; }    /* code type pour ENTIER */
+                | REEL                 { $$ = 2; }    /* code type pour REEL   */
+                | BOOLEEN              { $$ = 3; }    /* code type pour BOOL   */
+                | CARACTERE            { $$ = 4; }    /* code type pour CHAR   */
+                | CHAINE CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT
+                            { $$ = 5; }   /* par ex. type “chaine[n]” */
         ;
 
-        declaration_procedure: PROCEDURE { NIS+=1 ;numeregion++; empile(pile_region, numeregion); afficher_pile(pile_region);} IDF liste_parametres corps { NIS-=1; depile(pile_region); }
+        declaration_procedure: PROCEDURE IDF liste_parametres corps    {
+            /* region_corps = 0 pour l’instant, etiq_exec = 0 (sera l’étiquette de code plus tard) */
+            sem_decl_proc($2, 0, 0);
+            printf("Declaration de procedure reconnue ! \n");
+        }                  
         ;
 
-        declaration_fonction: FONCTION { NIS+=1 ;numeregion++; empile(pile_region, numeregion); afficher_pile(pile_region);} IDF liste_parametres RETOURNE type_simple corps { NIS-=1; depile(pile_region) ;}
+        declaration_fonction: FONCTION IDF liste_parametres RETOURNE type_simple corps  { sem_decl_fct($2, $5, 0, 0); printf("Declaration de fonction reconnue ! \n");}
         ; 
 
         liste_parametres: /* vide  */
@@ -124,10 +135,14 @@
         ; 
 
         liste_param: un_param 
-                   | liste_param POINT_VIRG un_param 
+                  | liste_param POINT_VIRG un_param 
         ; 
 
         un_param: IDF DEUX_POINTS type_simple 
+        {
+            /* region = 0 pour l’instant, offset = 0 (à gérer plus tard avec la pile d’activation) */
+            sem_decl_param($1, $3, 0, 0);
+        }
         ; 
 
         liste_inst_non_vide: DEBUT suite_liste_inst_non_vide FIN
@@ -139,47 +154,48 @@
 
         instruction: affectation  
                 | condition  
-                | tant_que    
-                | appel      
+                |tant_que    
+                |appel      
                 | VIDE       
                 | RETOURNE resultat_retourne
         ; 
 
         resultat_retourne: /* vide */                                                  
-                | expression 
-                ; 
+                         | expression 
+                         ; 
 
-        appel: IDF liste_arguments         {  /* printf("Appel de fonction reconnue ! \n"); */ }
-        ; 
+        appel: IDF liste_arguments                                                   { printf("Appel de fonction reconnue ! \n"); }
+         ; 
 
         liste_arguments: /* vide */
-                | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE  
-                ; 
+                 | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE  
+        ; 
 
         liste_args: un_arg 
-                | liste_args VIRGULE un_arg 
-                ;
+                  | liste_args VIRGULE un_arg 
+                  ;
 
         un_arg: expression 
                 ; 
 
-        condition: SI expression_booleenne ALORS liste_inst SINON liste_inst FINSI       { /* printf("Condition avec sinon reconnue ! \n"); */ }
-                 | SI expression_booleenne ALORS liste_inst FINSI                        { /* printf("Condition sans sinon reconnue ! \n"); */ }
+        condition: SI expression_booleenne ALORS liste_inst SINON liste_inst FINSI       { printf("Condition avec sinon reconnue ! \n"); }
+                 | SI expression_booleenne ALORS liste_inst FINSI                        { printf("Condition sans sinon reconnue ! \n"); }
                  ;                    
 
-        tant_que: TANT_QUE expression_booleenne FAIRE liste_inst FINTANT_QUE             { /* printf("Tant que boucle reconnue ! \n"); */ }
+        tant_que: TANT_QUE expression_booleenne FAIRE liste_inst FINTANT_QUE             { printf("Tant que boucle reconnue ! \n"); }
         ;                       
 
-        affectation: variable OPAFF expression                                           { /* printf("Affectation reconnue ! \n"); */ } 
+        affectation: variable OPAFF expression                                           { printf("Affectation reconnue ! \n"); } 
         ;                                        
 
-        variable: IDF                                                                   { printf("Index de la variable simple :\n");   /* printf("Variable simple reconnue ! \n"); */ }
+        /*** Partie autonomie ***/
+        variable: IDF  
                 | variable CROCHET_OUVRANT expression1 CROCHET_FERMANT                  
                 | variable POINT IDF 
                 ; 
 
-        expression: expression1                                                          { /* printf("Expression arithmetique reconnue ! \n"); */ }
-                | expression_booleenne                                                   { /* printf("Expression booleenne reconnue ! \n"); */ }
+        expression: expression1                                                          { printf("Expression arithmetique reconnue ! \n"); }
+                | expression_booleenne                                                   { printf("Expression booleenne reconnue ! \n"); }
                 ;
 
         expression1: expression1 PLUS expression2
@@ -200,16 +216,16 @@
                 ;
 
        expression_booleenne: expression_booleenne OU expression_et
-                | expression_et
-                ;
+                    | expression_et
+                    ;
 
         expression_et: expression_et ET expression_not
-                | expression_not
-                ;
+                    | expression_not
+                    ;
 
         expression_not: NON expression_not
-                | expression_comp
-                ;
+                    | expression_comp
+                    ;
 
         expression_comp: expression1 INFERIEUR expression1   
                | expression1 SUPERIEUR expression1
@@ -219,23 +235,59 @@
                | expression1 DIFFERENT expression1
                | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
                ;
-%%
 
-int yyerror(char *s){
+
+%%
+        int yyerror(char *s){
         fprintf(stderr, "\n ERREUR DE SYNTAXE à la ligne %d\n", yylineno);
         fprintf(stderr, " le token incorrect: %s\n", yytext);
         return 0;
-}
-
+        }
+/*
 int main(){
-        init_tab_lexico();
-        init_tab_decl();
-
         if(yyparse() == 0) {
                 printf("Analyse syntaxique terminée avec succès !\n");
-                //afficher_tab_lex(NULL);  // Décommenter pour afficher après succès
-                afficher_tab_decl(NULL);
-        }         
+        } else {
+                printf("Echec de l'analyse syntaxique.\n");
 
-        exit(EXIT_SUCCESS);
-}               
+        };
+
+        return 0;
+        }*/
+int main(int argc, char **argv) {
+        const char *fichier = (argc > 1) ? argv[1] : "fic_test.txt";
+
+        printf("========================================\n");
+        printf("    LECTURE DU FICHIER : %s\n", fichier);
+        printf("========================================\n\n");
+
+        yyin = fopen(fichier, "r");
+        if (!yyin) {
+                perror("Erreur ouverture fichier");
+                return 1;
+        }
+
+        /* Initialisation des tables */
+        sem_init();
+
+        /* Lancement de l'analyse syntaxique */
+        int result = yyparse();
+        fclose(yyin);
+
+        if (result == 0) {
+                printf("\n Analyse syntaxique terminée avec succès.\n");
+        } else {
+                printf("\n Erreurs détectées pendant l'analyse.\n");
+        }
+
+        /* Affichage des tables */
+        printf("\n========================================\n");
+        printf("        TABLES APRES ANALYSE\n");
+        printf("========================================\n");
+        sem_dump();
+
+        printf("\n========================================\n");
+        printf("        FIN DU PROGRAMME\n");
+        printf("========================================\n");
+        return 0;
+}

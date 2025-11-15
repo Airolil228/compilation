@@ -52,3 +52,4 @@ bool estVide(pile* pile) {
 int sommet(pile* pile) {
 	return pile->tete->valeur;
 }
+
