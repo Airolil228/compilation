@@ -2,39 +2,68 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../include/tab_repres.h"
 #include "../include/tab_decl.h"
-#include "../include/tab_lexico.h"
-#include "../include/pile.h"
+#include "../include/tab_repres.h"
 
-void init_pile_exection(){
-    for(int i = 0; i < MAX_ELEMENT_REGION; i++){
-          pile_exec[i].type = -1; 
-          pile_exec[i].val = -1; 
+
+int tab_repres_entet[MAX_TAB_REPRES]; 
+int indice_table_repres  = 0; 
+int offset = 0;
+
+void init_tab_repres(){
+    for(int i = 0; i < MAX_TAB_REPRES; i++){
+        tab_repres_entet[i] = -1;
     }
 }
 
-void affiche_pile_execution(){
-    fprintf(stdout,"Pile d'éxecution: \n");
-    for(int i = 0; i < MAX_ELEMENT_REGION; i++){
-        type_retour type_r = pile_exec[i].type; 
-        if( type_r != -1){
-            switch(type_r){
-            case  entier:
-                fprintf(stdout,"%d ", type_r);
-            break; 
-            case  floatant:
-                fprintf(stdout,"%d ", type_r);
-            break;
+
+void afficher_tab_repres(){
+    fprintf(stdout, "\n==================== TABLE DES REPRES DES TYPES ====================\n");
+        for(int i = 0; i < MAX_TAB_REPRES; i++ ){
+            if(tab_repres_entet[i] != -1){
+                fprintf(stdout,"%d ",tab_repres_entet[i]); 
             }
-        }else{  
-            fprintf(stdout,"VIDE"); 
-        }
-    }
+        }         
+    fprintf(stdout, "\n=====================================================================\n");
+
 }
 
+int getElementRepres(int index){
+    if( index > 0 && index < MAX_TAB_REPRES ){
+        return tab_repres_entet[index];
+    }else{
+        fprintf(stderr,"Indice non valide \n"); 
+    }
+    return -1;
+}
 
+void inserer_type_struct_tab_repres(int num_lex, int nb_champ, int type){
+     int position = 0;
+     int i = 1;  
+     tab_repres_entet[indice_table_repres] = nb_champ;
+     indice_table_repres++;
 
+     tab_repres_entet[indice_table_repres] = num_lex; 
+     indice_table_repres++;
+     tab_repres_entet[indice_table_repres] = type; 
+     indice_table_repres++;
+     tab_repres_entet[indice_table_repres] = position; 
+     indice_table_repres++;
+
+     while( i <= nb_champ){
+        printf("[DEBUG] Champ %d de la structure %d traité\n", i, num_lex);
+        i++;
+     }
+     offset += nb_champ; // Supposons 1 unité par champ     
+     printf("[DEBUG] Structure %d insérée avec %d champs\n", num_lex, nb_champ);
+    }
+
+/*
 int main(){
-
+    init_tab_repres(); 
+    afficher_tab_repres();
+    
     exit(EXIT_SUCCESS);
 }
+*/

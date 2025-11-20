@@ -2,14 +2,16 @@
         #include <stdio.h>
         #include <stdlib.h>
         #include "include/semantique.h"
+        #include "include/tab_repres.h"
+
 
         int yylex();
         int yyerror(char *s); 
 
         extern int yylineno;      // Nécessaire pour afficher le numéro de ligne
         extern char *yytext;      // Nécessaire pour afficher le token
-        extern FILE *yyin;     // IMPORTANT: source du lexer
-
+        extern FILE *yyin;        // IMPORTANT: source du lexer
+        int nb_champs;                                
 
         %}
         %union {
@@ -67,11 +69,15 @@
                       | declaration_type                                        { printf("Declaration de type reconnue ! \n");}       
         ;
         
-        declaration_type: TYPE IDF DEUX_POINTS STRUCT liste_champs FINSTRUCT
+        declaration_type: TYPE IDF  DEUX_POINTS STRUCT { nb_champs = 0; } liste_champs FINSTRUCT
         {
             /* TYPE struct : pour l’instant region_champs=0, taille_struct=0 (à calculer plus tard) */
             sem_decl_struct($2, 0, 0);
+            inserer_type_struct_tab_repres($2,nb_champs,1);
+      
             printf("Type structure reconnu ! \n");
+            
+            nb_champs = 0; // réinitialiser pour la prochaine structure   
         }
                 | TYPE IDF DEUX_POINTS TABLEAU dimension DE nom_type
         {
@@ -92,8 +98,8 @@
         une_dimension: CSTE_ENTIERE POINT_POINT CSTE_ENTIERE 
         ; 
 
-        liste_champs: un_champ  
-                | liste_champs POINT_VIRG un_champ     
+        liste_champs: un_champ  { nb_champs += 1;}
+                | liste_champs POINT_VIRG un_champ { nb_champs +=1;}    
         ;
 
         un_champ: IDF DEUX_POINTS nom_type 
@@ -112,12 +118,11 @@
                   | IDF         { $$ = $1; }   /* type défini par l’utilisateur (struct, alias, etc.) */
         ; 
 
-        type_simple: ENTIER               { $$ = 1; }    /* code type pour ENTIER */
+        type_simple: ENTIER            { $$ = 1; }    /* code type pour ENTIER */
                 | REEL                 { $$ = 2; }    /* code type pour REEL   */
                 | BOOLEEN              { $$ = 3; }    /* code type pour BOOL   */
                 | CARACTERE            { $$ = 4; }    /* code type pour CHAR   */
-                | CHAINE CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT
-                            { $$ = 5; }   /* par ex. type “chaine[n]” */
+                | CHAINE CROCHET_OUVRANT CSTE_ENTIERE CROCHET_FERMANT { $$ = 5; }   /* par ex. type “chaine[n]” */
         ;
 
         declaration_procedure: PROCEDURE IDF liste_parametres corps    {
@@ -164,7 +169,7 @@
                          | expression 
                          ; 
 
-        appel: IDF liste_arguments                                                   { printf("Appel de fonction reconnue ! \n"); }
+        appel: IDF liste_arguments                                                       { printf("Appel de fonction reconnue ! \n"); }
          ; 
 
         liste_arguments: /* vide */
@@ -269,7 +274,8 @@ int main(int argc, char **argv) {
 
         /* Initialisation des tables */
         sem_init();
-
+        init_tab_repres(); 
+        
         /* Lancement de l'analyse syntaxique */
         int result = yyparse();
         fclose(yyin);
@@ -285,7 +291,7 @@ int main(int argc, char **argv) {
         printf("        TABLES APRES ANALYSE\n");
         printf("========================================\n");
         sem_dump();
-
+        afficher_tab_repres();
         printf("\n========================================\n");
         printf("        FIN DU PROGRAMME\n");
         printf("========================================\n");

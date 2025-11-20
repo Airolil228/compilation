@@ -22,13 +22,14 @@ typedef union type_retour{
 	char * chaine; 
 	int entier;
 	bool boolean;
-	float floatant;  
+	float reel;
+	char caractere;  
 } type_retour; 
 
 
 typedef struct{
-	type_retour  type; 
-	int val; 
+	type_retour type; 
+	int val;  
 }noeud_pile ;
 
 extern noeud_pile pile_exec[MAX_ELEMENT_REGION]; 

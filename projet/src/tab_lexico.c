@@ -78,7 +78,10 @@
 
         fprintf(flux, "Contenu de la table de hachage : \n");
         for(int i = 0; i < MAX_TAB_HASHCODE ; ++i){
-            fprintf(flux, "tab_hashcode[%d] = %d \n", i, tab_hashcode[i]);
+            if(tab_hashcode[i] != -1){
+                fprintf(flux, "tab_hashcode[%d] = %d \n", i, tab_hashcode[i]);
+            }
+            
         }
     }
 
