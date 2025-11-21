@@ -5,6 +5,8 @@
 
 extern int tab_repres_entet[MAX_TAB_REPRES]; 
 
-void inserer_type_struct_tab_repres(int num_lex, int nb_champ, int type); 
+void insereTabRepres(int val);
+void insereNbchampsTabReprese(int index_nb_champs,int nb_champs);
+int taille_tab_repres();
 
 #endif /* TAB_REPRES_H */

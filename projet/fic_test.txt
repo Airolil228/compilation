@@ -1,9 +1,21 @@
-    programme 
-    var Anas : entier ;
+    programme
 
     type monType1 : struct 
         champ1 : entier ; 
-        champ2 : bool   
+        champ2 : reel;
+        champ3 : bool;
+        champ4 : char    
     finstruct ;
 
+    /*
+    type monType2 : struct 
+        champ1 : entier ; 
+        champ2 : reel;
+        champ3 : bool;
+        champ4 : entier ; 
+        champ5 : reel;
+        champ6 : bool;
+        champ7 : char    
+    finstruct ;
+    */
     fin

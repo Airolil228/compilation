@@ -157,17 +157,17 @@ int inserer_lexeme(char * lexeme){
     }
 
 
-/*
-    int main(){
-         init_tab_lexico();
-         afficher_tab_lex(NULL);
-
-        inserer_lexeme("variable1");
-        inserer_lexeme("variable1");
-        inserer_lexeme("variable2");
-        inserer_lexeme("variable3435");
+    int rechercher_lexeme(char *lexeme) {
+        if (lexeme == NULL) {
+            return -1;  
+        }
         
-         afficher_tab_lex(NULL);
-         exit(-1);
+        int longueur = strlen(lexeme);
+        for (int i = 0; i < MAX_TAB_LEXICO; i++) {
+            if (tab_lexico[i].longueur == longueur && strcmp(tab_lexico[i].lexeme, lexeme) == 0) {
+                return i; 
+            }
+        }
+    
+    return -1;  // Non trouvé
     }
-*/   

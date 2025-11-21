@@ -4,7 +4,7 @@
 
 #include "../include/tab_repres.h"
 #include "../include/tab_decl.h"
-#include "../include/tab_repres.h"
+#include "../include/tab_lexico.h"
 
 
 int tab_repres_entet[MAX_TAB_REPRES]; 
@@ -38,32 +38,20 @@ int getElementRepres(int index){
     return -1;
 }
 
-void inserer_type_struct_tab_repres(int num_lex, int nb_champ, int type){
-     int position = 0;
-     int i = 1;  
-     tab_repres_entet[indice_table_repres] = nb_champ;
-     indice_table_repres++;
-
-     tab_repres_entet[indice_table_repres] = num_lex; 
-     indice_table_repres++;
-     tab_repres_entet[indice_table_repres] = type; 
-     indice_table_repres++;
-     tab_repres_entet[indice_table_repres] = position; 
-     indice_table_repres++;
-
-     while( i <= nb_champ){
-        printf("[DEBUG] Champ %d de la structure %d traité\n", i, num_lex);
-        i++;
-     }
-     offset += nb_champ; // Supposons 1 unité par champ     
-     printf("[DEBUG] Structure %d insérée avec %d champs\n", num_lex, nb_champ);
-    }
-
-/*
-int main(){
-    init_tab_repres(); 
-    afficher_tab_repres();
-    
-    exit(EXIT_SUCCESS);
+void insereNbchampsTabReprese(int index_nb_champs,int nb_champs){
+    tab_repres_entet[index_nb_champs] = nb_champs; 
+    indice_table_repres++; 
 }
-*/
+
+void insereTabRepres(int val){
+    tab_repres_entet[indice_table_repres] = val; 
+    indice_table_repres++;
+}
+
+int taille_tab_repres(){
+    int taille = 0; 
+    while( tab_repres_entet[taille] != -1){
+        taille += 1; 
+    }
+    return taille; 
+}

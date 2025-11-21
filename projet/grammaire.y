@@ -11,8 +11,9 @@
         extern int yylineno;      // Nécessaire pour afficher le numéro de ligne
         extern char *yytext;      // Nécessaire pour afficher le token
         extern FILE *yyin;        // IMPORTANT: source du lexer
+        
         int nb_champs;                                
-
+        int index_nb_champs ;  // Index de départ pour la structure dans tab_repres
         %}
         %union {
                 int ival;   /* pour IDF, numéros de type, constantes entières, etc. */
@@ -66,15 +67,15 @@
         declaration:    declaration_variable                                    { printf("Declaration de variable reconnue ! \n");}
                       | declaration_fonction                                    { printf("Declaration de fonction reconnue ! \n");}
                       | declaration_procedure                                   { printf("Declaration de procedure reconnue ! \n");} 
-                      | declaration_type                                        { printf("Declaration de type reconnue ! \n");}       
+                      | declaration_type                                        { printf("Declaration de type reconnue ! \n"); }       
         ;
         
-        declaration_type: TYPE IDF  DEUX_POINTS STRUCT { nb_champs = 0; } liste_champs FINSTRUCT
+        declaration_type: TYPE  IDF  DEUX_POINTS STRUCT {  nb_champs = 0; index_nb_champs = taille_tab_repres(); insereTabRepres(0);   } liste_champs FINSTRUCT
         {
-            /* TYPE struct : pour l’instant region_champs=0, taille_struct=0 (à calculer plus tard) */
+             
             sem_decl_struct($2, 0, 0);
-            inserer_type_struct_tab_repres($2,nb_champs,1);
-      
+            insereNbchampsTabReprese(index_nb_champs,nb_champs); 
+            
             printf("Type structure reconnu ! \n");
             
             nb_champs = 0; // réinitialiser pour la prochaine structure   
@@ -98,11 +99,11 @@
         une_dimension: CSTE_ENTIERE POINT_POINT CSTE_ENTIERE 
         ; 
 
-        liste_champs: un_champ  { nb_champs += 1;}
+        liste_champs: un_champ                     { nb_champs += 1;}
                 | liste_champs POINT_VIRG un_champ { nb_champs +=1;}    
         ;
 
-        un_champ: IDF DEUX_POINTS nom_type 
+        un_champ: IDF DEUX_POINTS nom_type {  insereTabRepres($1);insereTabRepres($3); }; 
         ; 
         
         declaration_variable: VARIABLE IDF DEUX_POINTS nom_type 
@@ -115,7 +116,7 @@
         ;  
 
         nom_type: type_simple   { $$ = $1; }
-                  | IDF         { $$ = $1; }   /* type défini par l’utilisateur (struct, alias, etc.) */
+                  | IDF         { $$ = $1; /*association_nom($1,'TYPE')*/ }   /* type défini par l’utilisateur (struct, alias, etc.) */
         ; 
 
         type_simple: ENTIER            { $$ = 1; }    /* code type pour ENTIER */
@@ -262,9 +263,7 @@ int main(){
 int main(int argc, char **argv) {
         const char *fichier = (argc > 1) ? argv[1] : "fic_test.txt";
 
-        printf("========================================\n");
-        printf("    LECTURE DU FICHIER : %s\n", fichier);
-        printf("========================================\n\n");
+        
 
         yyin = fopen(fichier, "r");
         if (!yyin) {
@@ -273,6 +272,7 @@ int main(int argc, char **argv) {
         }
 
         /* Initialisation des tables */
+        init_tab_lexico();
         sem_init();
         init_tab_repres(); 
         
@@ -287,13 +287,14 @@ int main(int argc, char **argv) {
         }
 
         /* Affichage des tables */
-        printf("\n========================================\n");
-        printf("        TABLES APRES ANALYSE\n");
-        printf("========================================\n");
-        sem_dump();
+        
+        // printf("\n========================================\n");
+        // printf("        TABLES APRES ANALYSE\n");
+        // printf("========================================\n");
+        // sem_dump();
         afficher_tab_repres();
-        printf("\n========================================\n");
-        printf("        FIN DU PROGRAMME\n");
-        printf("========================================\n");
+        // printf("\n========================================\n");
+        // printf("        FIN DU PROGRAMME\n");
+        // printf("========================================\n");
         return 0;
 }
