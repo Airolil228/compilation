@@ -2,7 +2,7 @@
 #define TAB_REGION_H
 
 #include <stdio.h>
-#include "pile.h"
+#include "pile_region.h"
 
 #define TAB_REGION_MAX 100
 

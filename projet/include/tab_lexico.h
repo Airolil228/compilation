@@ -24,6 +24,6 @@ int rechercher_lexeme(char *lexeme);
 
 void init_tab_lexico();
 
-void afficher_tab_lex();
+void afficher_tab_lex(FILE *flux);
 
 #endif /* TAB_LEXICO_H */

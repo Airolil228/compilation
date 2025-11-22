@@ -1,10 +1,10 @@
-#include "../include/tab_decl.h"
-#include "../include/tab_lexico.h"
+/*Anas et Yacine*/
+#include "../include/semantique.h"
 #include <string.h>
 
 TAB_DE_Decl tab_de_dec[Taille_TAB];
 int zone_de_deb_utiliser = 0;
-
+extern pile* pile_region;
 
 /* Initialisation de la table de declaration */
 void init_tab_decl(){
@@ -16,12 +16,13 @@ void init_tab_decl(){
             tab_de_dec[i].region = 0;
             tab_de_dec[i].description = -1;
             tab_de_dec[i].exec = -1;
+        }else{
+            tab_de_dec[i].nature = -1;
+            tab_de_dec[i].suivant = -1;
+            tab_de_dec[i].region = 0;
+            tab_de_dec[i].description = -1;
+            tab_de_dec[i].exec = -1;
         }
-        tab_de_dec[i].nature = -1;
-        tab_de_dec[i].suivant = -1;
-        tab_de_dec[i].region = 0;
-        tab_de_dec[i].description = -1;
-        tab_de_dec[i].exec = -1;
     }
 
     
@@ -36,8 +37,8 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec) 
         return -1;
     }
 
-    if (nature < TYPE_S || nature > FCT) {
-        fprintf(stderr,"[tabdecl] inserer_decl: nature %d invalide (attendu 1..6)\n", nature);
+    if (nature < TYPE_B || nature > FCT) {
+        fprintf(stderr,"[tabdecl] inserer_decl: nature %d invalide (attendu 0..7)\n", nature);
         return -1;
     }
 
@@ -50,7 +51,7 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec) 
     rec.exec = exec;
 
     /* Cas 1 : la case primaire (lex_id) est libre */
-    if (tab_de_dec[lex_id].nature == 0) {
+    if (tab_de_dec[lex_id].nature == -1) {
         tab_de_dec[lex_id] = rec;
         return lex_id; 
     }
@@ -89,15 +90,15 @@ int inserer_decl(int lex_id, int nature, int region, int description, int exec) 
 /* - Affiche chaque case non vide (nature != 0) */
 static const char* nature_str(int n) {
     switch (n) {
-        case TYPE_B: return "TYPE_B ";
+        case TYPE_B: return "TYPE_B";
         case TYPE_S: return "TYPE_S";
         case TYPE_T: return "TYPE_T";
         case VAR:    return "VAR";
         case PARAM:  return "PARAM";
         case PROC:   return "PROC";
         case FCT:    return "FCT";
-    }
-    return "vide"; /* jamais atteint */
+    } 
+    return "vide"; 
 }
 
 /* Affiche le contenu de la table */
@@ -128,15 +129,14 @@ void afficher_tab_decl(FILE *flux) {
     fprintf(flux, "===============================================================\n\n");
 }
 
-/* Affiche uniquement la chaîne d’un identificateur donné
-   (utile pour vérifier les liens de débordement) */
+/* Affiche uniquement la chaîne d’un identificateur donné*/
 void afficher_chaine(FILE *flux, int lex_id) {
     if (!flux) flux = stdout;  /* sécurité */
     if (lex_id < 0 || lex_id >= Zone_de_debordement) {
         fprintf(flux, "Identificateur %d hors zone primaire.\n", lex_id);
         return;
     }
-    if (tab_de_dec[lex_id].nature == 0) {
+    if (tab_de_dec[lex_id].nature == -1) {
         fprintf(flux, "Aucune déclaration pour le lexème %d.\n", lex_id);
         return;
     }
@@ -157,24 +157,36 @@ void afficher_chaine(FILE *flux, int lex_id) {
     fprintf(flux, "\n");
 }
 
-/*
-int main() {
-    init_tab_decl();
+int association_nom(int idxLex, int typeRecherche){
+    if (idxLex < 0 || idxLex >= Zone_de_debordement)
+        return -1;
 
-    inserer_decl(10, VAR, 0, 0, 0);
-    inserer_decl(10, VAR, 1, 0, 5);
-    inserer_decl(15, PROC, 0, 2, 10);
-    
-*/
-    /* Afficher sur la console */
-//    afficher_tab_decl(stdout);
+    int declTrouvee = -1;
 
-    /* Afficher la chaîne du lexème 10 */
-  //  afficher_chaine(stderr, 10);
+    /* On parcourt la pile des régions en commençant par la plus locale */
+    elementPile *curseurRegion = pile_region->tete;
 
-    /* Afficher dans un fichier */
-    //FILE *f = fopen("table_decl.txt", "w");
-    //afficher_tab_decl(f);
-    //afficher_chaine(f, 10);
-    //fclose(f);
-//}
+    while (curseurRegion != NULL && declTrouvee == -1){
+        int regCible = curseurRegion->valeur;
+        /* on scanne toutes les déclarations portant ce lexème */
+        int pos = idxLex;
+        while (pos != -1 && declTrouvee == -1){
+            TAB_DE_Decl *entry = &tab_de_dec[pos];
+            int nat = entry->nature;
+            int reg = entry->region;
+            /* Critère : même région OU VAR/PARAM compatibles */
+            int okNature = (nat == typeRecherche) ||((typeRecherche == VAR   && nat == PARAM) ||
+                            (typeRecherche == PARAM && nat == VAR));
+
+            if (okNature && reg == regCible){
+                declTrouvee = pos;
+            }
+            else{
+                pos = entry->suivant;  // passer au débordement suivant
+            }
+        }
+        /* Région suivante */
+        curseurRegion = curseurRegion->suivant;
+    }
+    return declTrouvee;
+}

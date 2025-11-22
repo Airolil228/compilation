@@ -1,3 +1,4 @@
+/*Anas et Yacine*/
 #ifndef _TABDECL_H_
 #define _TABDECL_H_
 
@@ -45,5 +46,6 @@ void afficher_tab_decl(FILE *flux);
 
 void afficher_chaine(FILE *flux, int lex_id);
 
+int association_nom(int idxLex, int typeRecherche);
 
 #endif /* _TABDECL_H */

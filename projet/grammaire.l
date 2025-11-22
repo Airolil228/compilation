@@ -72,7 +72,7 @@
 
 [1-9][0-9]*                  { yylval.ival = atoi(yytext); return CSTE_ENTIERE; } 
 [0-9]+\.?[0-9]*             { return CSTE_REEL; }
-[a-zA-Z][a-zA-Z0-9]*         { yylval.ival = inserer_lexeme(yytext); return IDF; } /*à ameliorer */
+[a-zA-Z][a-zA-Z0-9]*         { printf("[LEX] Mot lu : %s -> IDF %d\n", yytext, inserer_lexeme(yytext)); yylval.ival = inserer_lexeme(yytext); return IDF; } /*à ameliorer */
 
 [ \t\r]+                   { /* ignorer tous les espaces blancs */ }
 \n                         {  ++yylineno; }

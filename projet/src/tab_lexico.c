@@ -2,7 +2,7 @@
     #include <stdio.h>
     #include <string.h>
     #include <stdbool.h>
-
+    
     #include "../include/tab_lexico.h"
     //#include "../include/types.h"
     

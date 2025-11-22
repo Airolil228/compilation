@@ -1,12 +1,12 @@
 CFLAGS = -Wall -Wextra -g
 
-OBJ = tab_lexico.o tab_declarations.o pile.o tab_region.o semantique.o
+OBJ = tab_lexico.o tab_declarations.o pile_region.o tab_region.o semantique.o
 
 parser: grammaire.tab.c grammaire.tab.h lex.yy.c $(OBJ)
-	gcc $(OBJ) grammaire.tab.c lex.yy.c -o parser -lfl
+	gcc $(OBJ) grammaire.tab.c lex.yy.c -o parser 
 
-test: test.c pile.o 
-	gcc pile.o test.c -o test -lfl
+test: test.c pile_region.o 
+	gcc pile_region.o test.c -o test 
 
 grammaire.tab.c grammaire.tab.h: grammaire.y
 	bison -d grammaire.y -Wcounterexamples
@@ -23,8 +23,8 @@ tab_region.o: src/tab_region.c include/tab_region.h
 semantique.o: src/semantique.c include/semantique.h
 	gcc $(CFLAGS) -c src/semantique.c -o semantique.o
 
-pile.o: src/pile.c include/pile.h
-	gcc $(CFLAGS) -c src/pile.c -o pile.o
+pile_region.o: src/pile_region.c include/pile_region.h
+	gcc $(CFLAGS) -c src/pile_region.c -o pile_region.o
 
 lex.yy.c: grammaire.l grammaire.tab.h
 	flex grammaire.l
