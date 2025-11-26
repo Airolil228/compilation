@@ -4,7 +4,8 @@
 
 #include "../include/tab_decl.h"
 #include "../include/tab_lexico.h"
-#include "../include/pile.h"
+#include "../include/pile_region.h"
+#include "../include/types.h"
 
 void init_pile_exection(){
     for(int i = 0; i < MAX_ELEMENT_REGION; i++){

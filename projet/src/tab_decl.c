@@ -1,5 +1,9 @@
 /*Anas et Yacine*/
-#include "../include/semantique.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "../include/tab_lexico.h"
+#include "../include/tab_decl.h"
+#include "../include/pile_region.h"
 #include <string.h>
 
 TAB_DE_Decl tab_de_dec[Taille_TAB];

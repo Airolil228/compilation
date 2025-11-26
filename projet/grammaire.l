@@ -1,7 +1,10 @@
 %{
  #include "grammaire.tab.h"
  #include <stdio.h>         
-#include "include/semantique.h"
+#include <stdlib.h>
+#include "include/tab_lexico.h"
+#include "include/tab_decl.h"
+#include "include/pile_region.h"
 %}
 
 %% 
