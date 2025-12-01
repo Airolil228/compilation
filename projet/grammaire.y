@@ -4,7 +4,7 @@
         #include "include/semantique.h"
         #include "include/tab_repres.h"
 
-
+        /*Anas Yaccine Vasily Benedict */
         int yylex();
         int yyerror(char *s); 
 
@@ -70,7 +70,7 @@
                       | declaration_type                                        { printf("Declaration de type reconnue ! \n"); }       
         ;
         
-        declaration_type: TYPE  IDF  DEUX_POINTS STRUCT {  nb_champs = 0; index_nb_champs = taille_tab_repres(); insereTabRepres(0);   } liste_champs FINSTRUCT
+        declaration_type: TYPE  IDF  DEUX_POINTS STRUCT { initDepl(); nb_champs = 0; index_nb_champs = taille_tab_repres(); insereTabRepres(0);   } liste_champs FINSTRUCT
         {
              
             sem_decl_struct($2, 0, 0);
@@ -103,20 +103,26 @@
                 | liste_champs POINT_VIRG un_champ { nb_champs +=1;}    
         ;
 
-        un_champ: IDF DEUX_POINTS nom_type {  insereTabRepres($1);insereTabRepres($3); }; 
-        ; 
+        un_champ: IDF DEUX_POINTS nom_type { 
+                insereTabRepres($1); 
+                insereTabRepres($3);
+                insereTabRepres(deplacer(getTaille($3))); 
+        }
+        
+         
         
         declaration_variable: VARIABLE IDF DEUX_POINTS nom_type 
         { 
             /* $2 : identifiant → index lexico (via le scanner)
                $4 : code du type (entier, bool, struct..., grâce à nom_type) */
             sem_decl_var($2, $4, 1);
-            printf("Declaration de variable reconnue ! \n");
+
+            printf("Declaration de variable reconnue \n");
         }
         ;  
 
         nom_type: type_simple   { $$ = $1; }
-                  | IDF         { $$ = $1; /*association_nom($1,'TYPE')*/ }   /* type défini par l’utilisateur (struct, alias, etc.) */
+                  | IDF         { $$ = association_nom($1,TYPE_S); }   /* type défini par l’utilisateur (struct, alias, etc.) */
         ; 
 
         type_simple: ENTIER            { $$ = 1; }    /* code type pour ENTIER */

@@ -3,7 +3,7 @@
  #include <stdio.h>         
 #include "include/semantique.h"
 %}
-
+/*Anas Yaccine Vasily Benedict */
 %% 
 "programme"     { return PROG; }
 "debut"         { return DEBUT; }

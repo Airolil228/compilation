@@ -5,14 +5,15 @@
 
     #include "../include/tab_lexico.h"
     //#include "../include/types.h"
-    
+    /*Vasily*/    
     int premier_el_vide_tablexico = 4 ; // les 4 premiers sont pour les lexèmes primitifs
     int indice_vide_tab_hashcode; 
 
     table_lexico tab_lexico[MAX_TAB_LEXICO];
     char *lexemes_prim[MAX_LEXEME_PRIM] = {"entier", "double", "char", "boolean"};
     int tab_hashcode[MAX_TAB_HASHCODE] ; 
-
+    
+    /*Vasily*/    
     int nb_lexemes(){
         int nb_lexeme = 0;
         
@@ -24,6 +25,7 @@
         return nb_lexeme; 
     }
 
+    /*Vasily*/    
     int hachage(char *lexeme){
         int car; 
         int hash = 0; 
@@ -39,6 +41,7 @@
         return hash % 32; 
     }
 
+    /*Vasily*/    
     int longeur_lexeme(char *lexeme){
         if(lexeme != NULL){
             return strlen(lexeme); 
@@ -48,6 +51,7 @@
         }
     }
 
+    /*Vasily*/    
     void inserer_lexeme_primitif(){
         for(int i = 0; i < 4; ++i){
             tab_lexico[i].longueur = longeur_lexeme(lexemes_prim[i]);
@@ -56,6 +60,7 @@
     }
 
     /* Affiche le contenu de la table */
+    /*Vasily*/    
     void afficher_tab_lex(FILE *flux) {
         if (!flux) flux = stdout;
 
@@ -85,6 +90,7 @@
         }
     }
 
+    /*Vasily*/    
     int est_lexeme_primitif(char *lexeme){
         for(int i = 0; i < MAX_LEXEME_PRIM; ++i){
             if(strcmp(lexeme, lexemes_prim[i]) == 0){
@@ -94,6 +100,8 @@
         return 0;
     }
 
+
+    /*Vasily*/    
     int prochaine_case_vide_table_lexico(){
         int i = 0; 
         while( tab_lexico[i].longueur != 0){
@@ -106,12 +114,14 @@
         return i;
     }
 
+    /*Vasily*/    
     void inserer_deux_premier_champ(char *lexeme,int index){
         tab_lexico[index].longueur = longeur_lexeme(lexeme);                                                                                                                            
         strcpy(tab_lexico[index].lexeme, lexeme);
         premier_el_vide_tablexico++;
     }
 
+    /*Vasily*/    
 int inserer_lexeme(char * lexeme){
     int hash = hachage(lexeme); 
     int val_tab_hashcode = tab_hashcode[hash]; // valeur actuelle dans la table de hachage
@@ -142,7 +152,7 @@ int inserer_lexeme(char * lexeme){
     exit(EXIT_FAILURE);
 }
 
-
+    /*Vasily*/    
     void init_tab_lexico(){
         for(int i = 0; i < MAX_TAB_LEXICO; ++i){
             tab_lexico[i].longueur = 0; 
@@ -156,7 +166,7 @@ int inserer_lexeme(char * lexeme){
         inserer_lexeme_primitif();
     }
 
-
+    /*Vasily*/    
     int rechercher_lexeme(char *lexeme) {
         if (lexeme == NULL) {
             return -1;  
