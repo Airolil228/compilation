@@ -20,6 +20,7 @@ static const char *noeud_type_vers_chaine(NoeudType t) {
 
         /* Affectation */
         case A_OPAFF: return "A_OPAFF";
+        case A_RETOURNE: return "A_RETOURNE";
 
         /* Appels */
         case A_APPEL_PROC: return "A_APPEL_PROC";
@@ -43,6 +44,7 @@ static const char *noeud_type_vers_chaine(NoeudType t) {
         case A_INF_EGAL: return "A_INF_EGAL";
         case A_SUP_EGAL: return "A_SUP_EGAL";
         case A_DIFF: return "A_DIFF";
+        case A_EGAL: return "A_EGAL";
 
         /* Instructions */
         case A_IF_THEN_ELSE: return "A_IF_THEN_ELSE";
@@ -52,7 +54,7 @@ static const char *noeud_type_vers_chaine(NoeudType t) {
     }
 }
 
-/* Création d'un nouveau nœud */
+/* Création d'un nouveau noeud */
 Noeud *creer_noeud(NoeudType type, int lexnum, int declnum) {
     Noeud *n = (Noeud *) malloc(sizeof(Noeud));
     if (n == NULL) {
@@ -67,7 +69,7 @@ Noeud *creer_noeud(NoeudType type, int lexnum, int declnum) {
     return n;
 }
 
-/* Ajoute un frère droit à un nœud */
+/* Ajoute un frère droit */
 void ajouter_frere(Noeud *noeud, Noeud *frere) {
     if (noeud == NULL) return;
 
@@ -78,36 +80,55 @@ void ajouter_frere(Noeud *noeud, Noeud *frere) {
     cur->frere_droit = frere;
 }
 
-/* Ajoute un fils gauche à un nœud.*/
+/* Ajoute un fils gauche */
 void ajouter_fils(Noeud *parent, Noeud *fils) {
     if (parent == NULL) return;
     parent->fils_gauche = fils;
     
 }
 
-/* Affichage temporaire Faut faire la pile pour qu'on puisse faire l'affichage */
-void afficher_arbre(Noeud *racine, int niveau) {
-    if (racine == NULL) 
+static void afficher_arbre_prefix(Noeud *n, const char *prefix, int isLast) {
+    if (!n) 
         return;
+    printf("%s%s", prefix, (isLast ? "└── " : "├── "));
 
-    /* Indentation */
-    int spaces = niveau * 2;
-    for (int i = 0; i < spaces; ++i) putchar(' ');
+    /* Affichage du contenu du noeud */
+    printf("%s (lex=%d, decl=%d)\n",
+           noeud_type_vers_chaine(n->type),
+           n->lexnum,
+           n->declnum);
 
-    /* Affiche le type et les numéros lex/decl */
+    /* Préfixe pour les enfants */
+    char newPrefix[512];
+    snprintf(newPrefix, sizeof(newPrefix), "%s%s",
+             prefix, (isLast ? "    " : "│   "));
+
+    /* Lister tous les fils du noeud */
+    Noeud *child = n->fils_gauche;
+    while (child) {
+        Noeud *next = child->frere_droit;
+        afficher_arbre_prefix(child, newPrefix, next == NULL);
+        child = next;
+    }
+}
+
+void afficher_arbre(Noeud *racine) {
+    if (!racine) {
+        printf("(arbre vide)\n");
+        return;
+    }
+    /* Racine sans préfixe */
     printf("%s (lex=%d, decl=%d)\n",
            noeud_type_vers_chaine(racine->type),
            racine->lexnum,
            racine->declnum);
 
-    /* Affiche le sous-arbre fils_gauche (niveau + 1) */
-    if (racine->fils_gauche != NULL) {
-        afficher_arbre(racine->fils_gauche, niveau + 1);
-    }
-
-    /* Affiche le frère droit au même niveau */
-    if (racine->frere_droit != NULL) {
-        afficher_arbre(racine->frere_droit, niveau);
+    /* Afficher ses fils */
+    Noeud *child = racine->fils_gauche;
+    while (child) {
+        Noeud *next = child->frere_droit;
+        afficher_arbre_prefix(child, "", next == NULL);
+        child = next;
     }
 }
 

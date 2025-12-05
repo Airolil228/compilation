@@ -17,8 +17,10 @@ extern int numregion;
 extern pile *pile_region;
 
 %}
+
 %union {
-int ival;   /* pour IDF, numéros de type, constantes entières, etc. */
+        int ival;   /* pour IDF, numéros de type, constantes entières, etc. */
+        struct noeud *node;
 }
 
 %token PROG  
@@ -46,21 +48,31 @@ int ival;   /* pour IDF, numéros de type, constantes entières, etc. */
 
 
 %type  <ival> nom_type type_simple
-%type <ival> variable
-%type <ival> expression
-%type <ival> expression1
-%type <ival> expression2
-%type <ival> expression3
-%type <ival> affectation
+
+%type <node> programme corps
+%type <node> liste_inst suite_liste_inst liste_inst_non_vide
+%type <node> instruction condition tant_que appel affectation
+%type <node> expression expression1 expression2 expression3
+%type <node> expression_booleenne expression_et expression_not expression_comp
+%type <node> variable
+%type <node> liste_arguments liste_args un_arg
+%type <node> suite_liste_inst_non_vide
+%type <node> resultat_retourne
+
 
 
 %%
 
 programme: PROG corps
+        {
+        $$ = $2;
+        printf("\n AST construit :\n");
+        afficher_arbre($$);
+        }
 ;
 
-corps:  liste_decl liste_inst   
-| liste_inst
+corps:  liste_decl liste_inst   { $$ = $2; }
+| liste_inst                    { $$ = $1; }
 ;        
 
 liste_decl:  declaration POINT_VIRG   
@@ -68,11 +80,30 @@ liste_decl:  declaration POINT_VIRG
 ;
 
 liste_inst: DEBUT suite_liste_inst FIN
+        {
+          Noeud *n = creer_noeud(A_LISTE, -1, -1);
+          ajouter_fils(n, $2);
+          $$ = n;
+        }
 ; 
 
 suite_liste_inst: /*vide*/ 
+        {
+          $$ = NULL;
+        }
         | suite_liste_inst instruction POINT_VIRG 
+        {
+          if ($1 == NULL) {
+              $$ = $2;
+          } else {
+              ajouter_frere($1, $2);  // accroche $2 à la fin de la chaîne $1
+              $$ = $1;
+          }
+        }
         | liste_inst_non_vide POINT_VIRG 
+        {
+          $$ = $1;        // déjà une liste complète → on la renvoie
+        }
 ;
 
 declaration:    declaration_variable                                    { printf("Declaration de variable reconnue ! \n");}
@@ -153,66 +184,121 @@ un_param: IDF DEUX_POINTS type_simple
         ; 
 
 liste_inst_non_vide: DEBUT suite_liste_inst_non_vide FIN
+        {
+          $$ = $2;   // la liste construite par suite_liste_inst_non_vide
+        }
 ;
 
-suite_liste_inst_non_vide: instruction POINT_VIRG
-        | suite_liste_inst_non_vide instruction POINT_VIRG
+suite_liste_inst_non_vide:
+      instruction POINT_VIRG
+      {
+          $$ = $1;        // une seule instruction → c’est la racine
+      }
+    | suite_liste_inst_non_vide instruction POINT_VIRG
+      {
+          ajouter_frere($1, $2); // ajoute l’instruction à la suite
+          $$ = $1;               // la racine reste la première instruction
+      }
 ;
 
-instruction: affectation  
-        | condition  
-        |tant_que    
-        |appel      
-        | VIDE       
-        | RETOURNE resultat_retourne
+instruction: affectation  { $$ = $1; }
+        | condition  { $$ = $1; }
+        |tant_que    { $$ = $1; }
+        |appel      { $$ = $1; }
+        | VIDE       { $$ = NULL; }
+        | RETOURNE resultat_retourne  
+        {
+        Noeud *n = creer_noeud(A_RETOURNE, -1, -1);
+        if ($2 != NULL)    // return x;
+                ajouter_fils(n, $2);
+        $$ = n;
+        }
         ; 
 
-resultat_retourne: /* vide */                                                  
-                | expression 
+resultat_retourne: /* vide */  { $$ = NULL; }                                                
+                | expression { $$ = $1; }
                 ; 
 
-appel: IDF liste_arguments                                                   { printf("Appel de fonction reconnue ! \n"); }
+appel: IDF liste_arguments   
         {
-        int id = $1;
-        int d = association_nom(id, FCT);
+                printf("Appel de fonction reconnue ! \n");
+                int id = $1;
+                int d = association_nom(id, FCT);
 
-        if (d == -1) {
-                fprintf(stderr, "[SEM] ERREUR : fonction '%s' non déclarée.\n",
-                        tab_lexico[id].lexeme);
-                exit(1);
-        }
+                if (d == -1) {
+                        fprintf(stderr, "[SEM] ERREUR : fonction '%s' non déclarée.\n",
+                                tab_lexico[id].lexeme);
+                        exit(1);
+                }
+                Noeud *n = creer_noeud(A_APPEL_FCT, id, d);
+                ajouter_fils(n, $2);    // liste_arguments retourne un nœud liste
+
+                $$ = n;
         }
         ; 
 
 liste_arguments: /* vide */
-        | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE  
+        {
+          $$ = NULL;
+        }
+        | PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE 
+        {
+          $$ = $2;
+        } 
 ; 
 
 liste_args: un_arg 
+        {
+          $$ = creer_noeud(A_LISTE_PARAM, -1, -1);
+          ajouter_fils($$, $1);
+        }
         | liste_args VIRGULE un_arg 
+        {
+          ajouter_frere($1->fils_gauche, $3);
+          $$ = $1;
+        }
         ;
 
-un_arg: expression 
+un_arg: expression
+        {
+          $$ = $1;
+        } 
 ; 
 
-condition: SI expression_booleenne ALORS liste_inst SINON liste_inst FINSI       { printf("Condition avec sinon reconnue ! \n"); }
-        | SI expression_booleenne ALORS liste_inst FINSI                        { printf("Condition sans sinon reconnue ! \n"); }
-        ;                    
+condition:SI expression_booleenne ALORS liste_inst SINON liste_inst FINSI
+        {
+                Noeud *n = creer_noeud(A_IF_THEN_ELSE, -1, -1);
+                ajouter_fils(n, $2);               // condition
+                ajouter_frere($2, $4);             // bloc THEN
+                ajouter_frere($4, $6);             // bloc ELSE
+                $$ = n;
+        }
+        | SI expression_booleenne ALORS liste_inst FINSI
+        {
+                Noeud *n = creer_noeud(A_IF_THEN_ELSE, -1, -1);
+                ajouter_fils(n, $2);              // condition
+                ajouter_frere($2, $4);            // bloc THEN
+                // pas de ELSE → rien à ajouter
+                $$ = n;
+        }
+;                    
 
-tant_que: TANT_QUE expression_booleenne FAIRE liste_inst FINTANT_QUE             { printf("Tant que boucle reconnue ! \n"); }
+tant_que: TANT_QUE expression_booleenne FAIRE liste_inst FINTANT_QUE             
+        {
+        Noeud *n = creer_noeud(A_WHILE, -1, -1);
+        ajouter_fils(n, $2);     // condition
+        ajouter_frere($2, $4);   // bloc
+        $$ = n;
+        }
 ;                       
 
-affectation: variable OPAFF expression                                           { printf("Affectation reconnue ! \n"); } 
+affectation: variable OPAFF expression 
         {
-        int decl_gauche = $1;            // numéro de déclaration
-        int type_gauche = tab_de_dec[decl_gauche].description;
-        int type_droite = $3;            // le type retourné par l’expression
-
-        if (type_gauche != type_droite) {
-        fprintf(stderr,
-                "[SEM] Types incompatibles dans l’affectation.\n");
-        exit(1);
-        }
+        printf("Affectation reconnue !\n");
+        Noeud *n = creer_noeud(A_OPAFF, -1, -1);
+        ajouter_fils(n, $1);      // gauche = variable
+        ajouter_frere($1, $3);    // droite = expression
+        $$ = n;
         }
         ;                                        
 
@@ -230,68 +316,203 @@ variable: IDF
                         exit(1);
                 }
 
-                $$ = d;
+                $$ = creer_noeud(A_IDF, id, d);
         }
-        | variable CROCHET_OUVRANT expression1 CROCHET_FERMANT                  
+        | variable CROCHET_OUVRANT expression1 CROCHET_FERMANT
+        {
+        // plus tard : construire un noeud A_LISTE_IND ou A_LISTE_CH
+        $$ = $1; // on propage pour le moment
+        }                  
         | variable POINT IDF 
+        {
+        // plus tard : noeud pour champ de struct
+        $$ = $1;
+        }
         ; 
 
-expression: expression1                                                          { printf("Expression arithmetique reconnue ! \n"); }
-        | expression_booleenne                                                   { printf("Expression booleenne reconnue ! \n"); }
-        ;
+expression:
+      expression1
+      {
+          printf("Expression arithmetique reconnue !\n");
+          $$ = $1;
+      }
+    | expression_booleenne
+      {
+          printf("Expression booleenne reconnue !\n");
+          $$ = $1;
+      }
+;
 
 expression1: expression1 PLUS expression2
+        {
+          Noeud *n = creer_noeud(A_PLUS, -1, -1);
+          ajouter_fils(n, $1);             // fils gauche = expression1
+          ajouter_frere($1, $3);           // frère droit = expression2
+          $$ = n;
+        }
         | expression1 MOINS expression2
+        {
+          Noeud *n = creer_noeud(A_MOINS, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+        }
         | expression2
+        {
+         $$ = $1;
+        }
         ;
 
-expression2: expression2 MULT  expression3
+expression2:
+        expression2 MULT expression3
+        {
+        Noeud *n = creer_noeud(A_MULT, -1, -1);
+        ajouter_fils(n, $1);
+        ajouter_frere($1, $3);
+        $$ = n;
+        }
         | expression2 DIV expression3
+        {
+        Noeud *n = creer_noeud(A_DIV, -1, -1);
+        ajouter_fils(n, $1);
+        ajouter_frere($1, $3);
+        $$ = n;
+        }
         | expression3
+        {
+        $$ = $1;
+        }
         ;
 
-expression3: variable         { $$ = tab_de_dec[$1].description; }
-        | CSTE_ENTIERE     { $$ = 1; }
-        | CSTE_REEL        { $$ = 2; }
-        | VRAI { $$ = 3; }   
-        | FAUX { $$ = 3; }   
+expression3:
+        variable
+        {
+        $$ = $1;   // la variable est déjà un noeud A_IDF
+        }
+        | CSTE_ENTIERE
+        {
+        $$ = creer_noeud(A_CSTE_ENT, $1, -1);
+        }
+        | CSTE_REEL
+        {
+        $$ = creer_noeud(A_CSTE_REELLE, $1, -1);
+        }
+        | VRAI
+        {
+        $$ = creer_noeud(A_CSTE_BOOL, /*lexnum=*/-1, -1);
+        }
+        | FAUX
+        {
+        $$ = creer_noeud(A_CSTE_BOOL, /*lexnum=*/-1, -1);
+        }
         | IDF PARENTHESE_OUVRANTE liste_args PARENTHESE_FERMANTE
         {
-                /* Appel de fonction */
-                int id = $1;
-                int d = association_nom(id, FCT);
-
-                if (d == -1) {
+        int id = $1;
+        int d = association_nom(id, FCT);
+        if (d == -1) {
                 fprintf(stderr, "[SEM] ERREUR : fonction '%s' non déclarée.\n",
-                        tab_lexico[id].lexeme);
+                tab_lexico[id].lexeme);
                 exit(1);
-                }
-
-                $$ = tab_de_dec[d].description;  // type de retour
+        }
+        Noeud *n = creer_noeud(A_APPEL_FCT, id, d);
+        ajouter_fils(n, $3);   // $3 = liste_args (déjà construite comme liste)
+        $$ = n;
         }
         ;
 
 
-expression_booleenne: expression_booleenne OU expression_et
+
+expression_booleenne:
+        expression_booleenne OU expression_et
+        {
+                Noeud *n = creer_noeud(A_OR, -1, -1);
+                ajouter_fils(n, $1);
+                ajouter_frere($1, $3);
+                $$ = n;
+        }
         | expression_et
+        {
+                $$ = $1;
+        }
         ;
 
-expression_et: expression_et ET expression_not
+
+expression_et:
+        expression_et ET expression_not
+        {
+                Noeud *n = creer_noeud(A_AND, -1, -1);
+                ajouter_fils(n, $1);
+                ajouter_frere($1, $3);
+                $$ = n;
+        }
         | expression_not
-        ;
+        {
+                $$ = $1;
+        }
+;
 
-expression_not: NON expression_not
+expression_not:
+        NON expression_not
+        {
+                Noeud *n = creer_noeud(A_NOT, -1, -1);
+                ajouter_fils(n, $2);
+                $$ = n;
+        }
         | expression_comp
-        ;
+        {
+                $$ = $1;
+        }
+;
 
-expression_comp: expression1 INFERIEUR expression1   
-        | expression1 SUPERIEUR expression1
-        | expression1 EGALE expression1
-        | expression1 INFERIEUR_EGAL expression1
-        | expression1 SUPERIEUR_EGAL expression1
-        | expression1 DIFFERENT expression1
-        | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
-        ;
+expression_comp:
+      expression1 INFERIEUR expression1
+      {
+          Noeud *n = creer_noeud(A_INF, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | expression1 SUPERIEUR expression1
+      {
+          Noeud *n = creer_noeud(A_SUP, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | expression1 EGALE expression1
+      {
+          Noeud *n = creer_noeud(A_EGAL, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | expression1 INFERIEUR_EGAL expression1
+      {
+          Noeud *n = creer_noeud(A_INF_EGAL, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | expression1 SUPERIEUR_EGAL expression1
+      {
+          Noeud *n = creer_noeud(A_SUP_EGAL, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | expression1 DIFFERENT expression1
+      {
+          Noeud *n = creer_noeud(A_DIFF, -1, -1);
+          ajouter_fils(n, $1);
+          ajouter_frere($1, $3);
+          $$ = n;
+      }
+    | PARENTHESE_OUVRANTE expression_booleenne PARENTHESE_FERMANTE
+      {
+          $$ = $2;
+      }
+;
+
 
 
 %%

@@ -21,6 +21,7 @@ typedef enum {
 
     /* Affectation */
     A_OPAFF,
+    A_RETOURNE,
 
     /* Appels */
     A_APPEL_PROC,
@@ -44,6 +45,7 @@ typedef enum {
     A_INF_EGAL,
     A_SUP_EGAL,
     A_DIFF,
+    A_EGAL, 
 
     /* Instructions */
     A_IF_THEN_ELSE,
@@ -53,12 +55,12 @@ typedef enum {
 
 
 /* Structure d'un nœud */
-typedef struct Noeud {
+typedef struct noeud {
     NoeudType type;
     int lexnum;     /* numéro lexicographique */
     int declnum;    /* numéro de déclaration  */
-    struct Noeud *fils_gauche;  /* fils gauche */
-    struct Noeud *frere_droit; /* frère droit */
+    struct noeud *fils_gauche;  /* fils gauche */
+    struct noeud *frere_droit; /* frère droit */
 } Noeud;
 
 /* Création d'un nouveau nœud */
@@ -70,8 +72,10 @@ void ajouter_fils(Noeud *parent, Noeud *fils);
 /* Ajoute un frère droit à un nœud */
 void ajouter_frere(Noeud *noeud, Noeud *frere);
 
+static void afficher_arbre_prefix(Noeud *n, const char *prefix, int isLast);
+
 /* Affichage lisible de l'arbre abstrait */
-void afficher_arbre(Noeud *racine, int niveau);
+void afficher_arbre(Noeud *racine);
 
 /* Libération mémoire */
 void detruire_arbre(Noeud *racine);
