@@ -1,0 +1,31 @@
+programme                                                                              
+    type monType1 : struct 
+        champ1 : entier ; 
+        champ2 : reel
+    finstruct ;
+    
+    /*
+    type monType2 : struct 
+        champ3 : entier ; 
+        champ4 : monType1
+    finstruct ;
+    */
+
+    procedure appelle1(a: entier) 
+    debut
+    
+    fin ;
+        
+    fonction appelle(a: entier;b: entier) retourne reel
+    debut  
+        retourne a ;
+    fin ;
+    
+    type monTab : tab [ 1 .. 8 ] de reel ;
+    var t : monTab ;
+    
+    debut 
+
+
+
+    fin
