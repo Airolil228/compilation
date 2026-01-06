@@ -1,0 +1,6 @@
+programme
+var a : entier ;
+
+debut
+    b := a ;
+fin

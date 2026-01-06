@@ -1,0 +1,16 @@
+programme
+var a : entier ;
+var b : entier ;
+var C : bool ;
+
+debut
+    si (C == vrai) alors
+        debut
+            a := b ;
+        fin
+    sinon
+        debut
+            b := a ;
+        fin
+    finsi ;
+fin

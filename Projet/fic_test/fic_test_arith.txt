@@ -1,0 +1,9 @@
+programme
+var a : entier ;
+var b : entier ;
+var c : entier ;
+
+debut
+    a := b + c * b ;
+    b := a - c / b;
+fin

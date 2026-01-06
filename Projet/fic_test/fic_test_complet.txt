@@ -1,0 +1,33 @@
+programme
+
+var a : entier ;
+var b : entier ;
+var c : char ;
+var C : bool ;
+var D : bool ;
+
+
+
+procedure affiche(a : entier ; b : bool ; c : char)
+    fonction somme(a : entier ; b : entier ; c : char) retourne entier
+        debut
+            retourne a ;
+        fin ;
+    debut
+        a := somme(a , b , c) ;
+    fin ;
+
+type monType1 : struct
+    champ1 : entier ;
+    champ2 : bool
+finstruct ;
+
+debut
+    tant_que (C == vrai) || (D == faux) faire
+    debut
+        a := b ;
+    fin
+    fintant_que ;
+
+    affiche(a , C , c) ;
+fin
